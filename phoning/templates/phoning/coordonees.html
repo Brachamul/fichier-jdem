@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}Coordonées d'un adhérent au pif{% endblock title %}
+
+
+
+{% block content %}{{ block.super }}
+
+<div style="max-width: 480px; margin: auto;">
+
+<h1>Coordonées d'un<br/>adhérent au pif</h1>
+
+<p><a class="btn btn-default btn-block" href=""><i class="fa fa-refresh"></i> Charger un nouvel adhérent</a></p>
+
+{% if adherent %}
+
+	<p><strong>Nom :</strong> 
+	{{ adherent.prenom }} {{ adherent.nom }}</p>
+	
+	<p><strong>Ville :</strong>
+	{{ adherent.ville }} ({{ adherent.federation }})<p>
+	
+	<p><strong>Âge :</strong>
+	{{ adherent.date_de_naissance|timesince }}</p>
+	
+	<p><strong>Première adhésion :</strong>
+	{{ adherent.date_premiere_adhesion|timesince }}</p>
+	
+	<p><strong>Dernière cotisation :</strong>
+	{{ adherent.date_derniere_cotisation|timesince }}</p>
+	
+	<p><strong>Tel(s) :</strong>
+	{{ adherent.tel_portable }} {{ adherent.tel_bureau }} {{ adherent.tel_domicile }}</p>
+	
+	{% if adherent.mandats %}
+	<p><strong>Mandat(s) :</strong>
+	{{ adherent.mandats }} {{ adherent.commune }}</p>
+	{% endif %}
+	
+	<p>
+	<form method="POST" action="" enctype="multipart/form-data">
+		<div class="form-group">
+			{% csrf_token %}
+			<textarea name="note" class="form-control" maxlength="5000" rows="6"
+			placeholder="Notes..."></textarea>
+		</div>
+		<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
+		<div class="form-group">
+			<button type="submit" class="btn btn-default">
+				<i class="fa fa-check"></i>
+				Enregistrer
+			</button>
+		</div>
+	</form>
+	</p>
+	<hr/>
+	<h4>Notes :</h4>
+	{% if adherent.notes %}
+		<ul>
+		{% for note in adherent.notes.all|dictsortreversed:"date" %}
+			<li><p><em style="color: #666">{{ note.date|date:"Y-m-d à H:i" }}, par {{ note.author }}</em><br/>{{ note.text }}</p></li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+
+{% endif %}
+
+{% endblock content %}
+
+</div>
+
+{% block scripts %}{{ block.super }}
+
+{% endblock scripts %}
+
