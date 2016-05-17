@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}{{ block.super }}
+
+{% if page_title %}<h1>{{ page_title }}</h1>{% endif %}
+
+<ul>
+{% for object in objects %}
+	<li>
+
+		{% if object.title %}
+			<h2>{{ object.title }}</h2>
+		{% endif %}
+
+		{% if object.name %}
+			<h4>{{ object.name }}</h4>
+		{% endif %}
+
+		{% if object.text %}
+			<p>{{ object.text }}</p>
+		{% endif %}
+
+		{% if object.created and object.created_by %}
+			<p style="font-size: .8em; color: #666">{{ object.created|date:"Y-m-d à H:i" }}, par {{ object.created_by }}</em></p>
+		{% elif object.created %}
+			<p style="font-size: .8em; color: #666">{{ object.created|date:"Y-m-d à H:i" }}</em></p>
+		{% elif object.created %}
+			<p style="font-size: .8em; color: #666">par {{ object.created_by }}</em></p>
+		{% endif %}
+
+	</li>
+{% endfor %}
+</ul>
+
+{% if not objects %}
+
+<p>Cette liste est vide.</p>
+
+{% endif %}
+
+{% endblock content %}
+
+
+
+{% block scripts %}{{ block.super }}
+
+{% endblock scripts %}
+
