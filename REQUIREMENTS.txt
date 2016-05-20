@@ -1,5 +1,4 @@
 Django==1.9.6
-django-autoslug==1.9.3
 django-bootstrap3==7.0.1
 six==1.10.0
 unicode-slugify==0.1.3

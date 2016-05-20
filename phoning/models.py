@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 
 
-class PhoningOperation(models.Model):
+class Operation(models.Model):
 	name = models.CharField(max_length=255)
 	slug = models.SlugField(max_length=255)
 	query = models.CharField(max_length=5000)
@@ -22,5 +22,5 @@ class PhoningOperation(models.Model):
 
 class UserRequest(models.Model):
 	user = models.ForeignKey(User)
-	operation = models.ForeignKey(PhoningOperation)
+	operation = models.ForeignKey(Operation)
 	date = models.DateTimeField(auto_now_add=True)

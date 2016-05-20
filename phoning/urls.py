@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
 	url(r'^$', views.phoning, name='phoning'),
-	url(r'^operations/$', views.phoning_operations, name='phoning_operations'),
-#	url(r'^$', views.coordonees, name='coordonees'),
+	url(r'^operations/$', views.OperationsList.as_view(), name='phoning_operations'),
+	url(r'^operations/(?P<operation_id>[0-9]+)/$', views.coordonnees, name='coordonnees'),
+	url(r'^operations/(?P<operation_id>[0-9]+)/liste/$', views.OperationTargets.as_view(), name='operation_targets'),
 ]
