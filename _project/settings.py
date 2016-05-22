@@ -113,7 +113,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -132,3 +132,12 @@ LOGIN_REDIRECT_URL = '/'
 
 from django.contrib import messages
 MESSAGE_TAGS = { messages.ERROR: 'danger' }
+
+
+##########################
+#  Settings localisables :
+##########################
+
+# import local_settings if exist
+try: from local_settings import *
+except ImportError: pass
