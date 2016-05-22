@@ -100,11 +100,28 @@ class Adherent(models.Model):
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
 
+	class Meta:
+		ordering = ['nom']
+		verbose_name = "adhérent".encode('utf-8')
+		verbose_name_plural = 'adhérents'.encode('utf-8')
 
-class AdherentDuFichier(models.Model):
+
+
+class DateDeCotisation(models.Model):
+
+	date = models.DateTimeField()
+	adherents = models.ManyToManyField(Adherent, related_name='adherents_du_jour')
+
+	def __str__(self): return self.date.strftime('%Y-%m-%d')
 
 	class Meta:
-		verbose_name_plural = "adhérents du fichier".encode('utf-8')
+		verbose_name = "date de cotisation".encode('utf-8')
+		verbose_name_plural = "dates de cotisation".encode('utf-8')
+		ordering = ['-date']
+
+
+
+class AdherentDuFichier(models.Model):
 
 	fichier = models.ForeignKey(FichierAdherents)
 	adherent = models.ForeignKey(Adherent, null=True)
@@ -167,6 +184,11 @@ class AdherentDuFichier(models.Model):
 		adherent_de_la_base.importe_par_le_fichier 		= self.fichier
 		adherent_de_la_base.save()
 
+		date_de_cotisation,created = DateDeCotisation.objects.get_or_create(date=self.date_derniere_cotisation)
+		adherent_de_la_base.dates_de_cotisation.add(date_de_cotisation)
+		# permet de sauvegarder un historique des cotisations
+
+
 	def creer_un_nouvel_adherent(self):
 		''' Ajoute un adhérent du fichier importé à la base '''
 		nouvel_adherent = Adherent(num_adherent=self.num_adherent)
@@ -180,10 +202,18 @@ class AdherentDuFichier(models.Model):
 
 	def __str__(self): return ('%s %s') % (self.prenom, self.nom)
 
+	class Meta:
+		verbose_name = "adhérent du fichier".encode('utf-8')
+		verbose_name_plural = "adhérents du fichier".encode('utf-8')
+		ordering = ['nom']
+
 
 
 class Note(models.Model):
+
 	target = models.ForeignKey(Adherent, related_name='notes')
 	author = models.ForeignKey(User)
 	text = models.CharField(max_length=1024)
 	date = models.DateTimeField(auto_now_add=True)
+	
+	def __str__(self): return self.text

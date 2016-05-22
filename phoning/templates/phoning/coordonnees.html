@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 
-{% block title %}Coordonées d'un adhérent au pif{% endblock title %}
+{% block title %}Coordonnées d'un adhérent au pif{% endblock title %}
 
 
 
@@ -10,7 +10,7 @@
 
 <div style="max-width: 480px; margin: auto;">
 
-<h1>Coordonées d'un<br/>adhérent au pif</h1>
+{% if page_title %}<h1>{{ page_title }} :</h1>{% endif %}
 
 <p><a class="btn btn-default btn-block" href=""><i class="fa fa-refresh"></i> Charger un nouvel adhérent</a></p>
 
@@ -32,7 +32,14 @@
 	{{ adherent.date_derniere_cotisation|timesince }}</p>
 	
 	<p><strong>Tel(s) :</strong>
-	{{ adherent.tel_portable }} {{ adherent.tel_bureau }} {{ adherent.tel_domicile }}</p>
+	{% if adherent.tel_portable %}<a href="tel:{{ adherent.tel_portable }}">{{ adherent.tel_portable }}</a>{% endif %}
+	{% if adherent.tel_bureau %}<a href="tel:{{ adherent.tel_bureau }}">{{ adherent.tel_bureau }}</a>{% endif %}
+	{% if adherent.tel_domicile %}<a href="tel:{{ adherent.tel_domicile }}">{{ adherent.tel_domicile }}</a>{% endif %}
+
+	<style>
+		a[href^="tel:"] { margin-right: 1em; }
+		a[href^="tel:"]:before { content: "☎ "; }
+	</style>
 	
 	{% if adherent.mandats %}
 	<p><strong>Mandat(s) :</strong>
@@ -55,6 +62,11 @@
 		</div>
 	</form>
 	</p>
+
+	{% if user.is_staff and admin_url %}	
+		<a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a>	
+	{% endif %}
+
 	<hr/>
 	<h4>Notes :</h4>
 	{% if adherent.notes %}
