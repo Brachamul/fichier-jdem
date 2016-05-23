@@ -1,4 +1,4 @@
-import random
+import random, ast
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -59,7 +59,7 @@ class OperationTargets(ListView):
 		context = super(OperationTargets, self).get_context_data(**kwargs)
 		operation = Operation.objects.get(pk=self.kwargs['operation_id'])
 		context['page_title'] = "Membres ciblés par l'opération"
-		query = operation.query
+		query = ast.literal_eval(operation.query) # transform string query into dictionary
 		context['object_list'] = Adherent.objects.filter(**query) # **{operation.query}
 		context['url_by_id'] = True
 		context['url_prefix'] = urlresolvers.reverse('admin:fichiers_adherents_adherent_changelist') # changelist because addinng id after
