@@ -35,6 +35,9 @@ class DatesDeCotisationInline(admin.TabularInline):
 	model = DateDeCotisation.adherents.through
 	readonly_fields = ['datedecotisation']
 	can_delete = False
+	extra = 0
+	verbose_name = "date de cotisation".encode('utf-8')
+	verbose_name_plural = "dates de cotisation".encode('utf-8')
 
 class NotesInline(admin.TabularInline):
 	model = Note
