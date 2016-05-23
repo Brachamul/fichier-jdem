@@ -4,8 +4,8 @@ Django settings, generated using Django 1.9.4.
 
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Build paths inside the project like this: os.path.join(PROJECT_ROOT, ...)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,7 +56,7 @@ ROOT_URLCONF = '_project.urls'
 TEMPLATES = [
 	{
 		'BACKEND': 'django.template.backends.django.DjangoTemplates',
-		'DIRS': ['static/templates/'],
+		'DIRS': [ os.path.join(PROJECT_ROOT, 'static/templates/'), ],
 		'APP_DIRS': True,
 		'OPTIONS': {
 			'context_processors': [
@@ -78,7 +78,7 @@ WSGI_APPLICATION = '_project.wsgi.application'
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+		'NAME': os.path.join(PROJECT_ROOT, 'db.sqlite3'),
 	}
 }
 
@@ -121,10 +121,10 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-STATIC_ROOT = os.path.join((BASE_DIR), "_static_root")
-MEDIA_ROOT = os.path.join((BASE_DIR), "_media_root")
+STATIC_ROOT = os.path.join((PROJECT_ROOT), "_static_root")
+MEDIA_ROOT = os.path.join((PROJECT_ROOT), "_media_root")
 STATICFILES_DIRS = (
-	os.path.join((BASE_DIR), "static", "static"),
+	os.path.join((PROJECT_ROOT), "static", "static"),
 )
 
 LOGIN_URL = '/login/'
