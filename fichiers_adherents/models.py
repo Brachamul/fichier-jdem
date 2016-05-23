@@ -185,7 +185,7 @@ class AdherentDuFichier(models.Model):
 		adherent_de_la_base.save()
 
 		date_de_cotisation,created = DateDeCotisation.objects.get_or_create(date=self.date_derniere_cotisation)
-		adherent_de_la_base.dates_de_cotisation.add(date_de_cotisation)
+		date_de_cotisation.adherents.add(adherent_de_la_base)
 		# permet de sauvegarder un historique des cotisations
 
 
