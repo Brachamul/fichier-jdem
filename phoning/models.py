@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 
 class Operation(models.Model):
 	name = models.CharField(max_length=255)
-	slug = models.SlugField(max_length=255)
 	query = models.CharField(max_length=5000)
 	authorized_users = models.ManyToManyField(User, related_name='authorized_users')
 	valid_until = models.DateTimeField()
