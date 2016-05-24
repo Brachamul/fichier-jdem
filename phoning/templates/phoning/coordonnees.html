@@ -45,6 +45,18 @@
 	<form method="POST" action="" enctype="multipart/form-data">
 		<div class="form-group">
 			{% csrf_token %}
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" name="call_successful" {% if call_successful %}checked{% endif %}>
+					Appel réussi !
+				</label>
+			</div>
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" name="wrong_number" {% if wrong_number %}checked{% endif %}>
+					Mauvais numéro :(
+				</label>
+			</div>
 			<textarea name="note" class="form-control" maxlength="5000" rows="6"
 			placeholder="Notes..."></textarea>
 		</div>

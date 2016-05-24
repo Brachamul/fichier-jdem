@@ -3,6 +3,8 @@
 
 {% block content %}{{ block.super }}
 
+<div class="col-sm-12">
+
 {% if page_title %}<h1>{{ page_title }} ({{ object_list|length }}) :</h1>{% endif %}
 
 {% if user.is_staff and admin_url and object_list|length > 10 %}
@@ -69,7 +71,7 @@
 <p><a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
 {% endif %}
 
-
+</div> <!--columns-->
 
 {% endblock content %}
 
