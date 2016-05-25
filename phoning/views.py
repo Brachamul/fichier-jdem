@@ -19,8 +19,6 @@ from .forms import *
 
 
 
-time_threshold = datetime.now() - timedelta(minutes=20)
-
 def getRandomInstance(QuerySet, filter=False):
 	if QuerySet.count() < 1 :
 		# RAISE ERROR
@@ -101,10 +99,11 @@ def coordonnees(request, operation_id):
 				new_note = Note(target=adherent, author=request.user, text=request.POST.get('note'))
 				new_note.save()
 		else:
-			recentRequests = UserRequest.objects.filter(user=request.user).exclude(date__lt=time_threshold).count()
-			if recentRequests > operation.max_requests :
-				adherent = False
+			time_threshold = datetime.now() - timedelta(minutes=20) # 20 minutes ago
+			recentRequests = UserRequest.objects.filter(user=request.user).exclude(date__lt=time_threshold)
+			if recentRequests.count() > operation.max_requests :
 				messages.error(request, "Vous avez réalisé plus de {} requêtes en moins de 20 minutes. Il vous faudra désormais attendre un peu.".format(operation.max_requests))
+				return redirect('phoning')
 			else :
 				query = ast.literal_eval(operation.query) # admin-written query transformed into useable filter
 				adherents_called_successfully = operation.targets_called_successfully.all()
@@ -119,7 +118,6 @@ def coordonnees(request, operation_id):
 	
 		return render(request, 'phoning/coordonnees.html', {
 			'adherent': adherent,
-			'admin_url': reverse('admin:fichiers_adherents_adherent_change', args=(adherent.num_adherent,)),
 			'page_title': 'Opération ' + operation.name,
 			'wrong_number': operation.targets_with_wrong_number.filter(pk=adherent.pk),
 			'call_successful': operation.targets_called_successfully.filter(pk=adherent.pk),

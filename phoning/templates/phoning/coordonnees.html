@@ -71,7 +71,7 @@
 	</p>
 
 	{% if user.is_staff and admin_url %}	
-		<a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a>	
+		<a class="btn btn-default" href="{% url 'admin:fichiers_adherents_adherent_change' adherent.pk %}"><i class="fa fa-gears"></i> Administrer</a>	
 	{% endif %}
 
 	<hr/>
