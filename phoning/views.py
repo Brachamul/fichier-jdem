@@ -99,7 +99,7 @@ def coordonnees(request, operation_id):
 				new_note = Note(target=adherent, author=request.user, text=request.POST.get('note'))
 				new_note.save()
 		else:
-			time_threshold = datetime.now() - timedelta(minutes=1) # 20 minutes ago
+			time_threshold = datetime.now() - timedelta(minutes=20) # 20 minutes ago
 			recentRequests = UserRequest.objects.filter(user=request.user).exclude(date__lt=time_threshold)
 			if recentRequests.count() > operation.max_requests :
 				messages.error(request, "Vous avez réalisé plus de {} requêtes en moins de 20 minutes. Il vous faudra désormais attendre un peu.".format(operation.max_requests))
