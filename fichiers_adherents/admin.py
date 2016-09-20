@@ -7,12 +7,18 @@ from .models import *
 class AdherentDuFichierInline(admin.TabularInline):
 	# For each feature, display development projects that can improve it
 	model = AdherentDuFichier
-	list_per_page = 2000
+	list_per_page = 50
 	fk_name = 'fichier'
 	extra = 0
+	fields = ("genre", "nom", "prenom", "federation", "ville", "email", "tel_portable", "num_adherent",)
+	readonly_fields = fields
+
+	class Media:
+		css = { "all" : ("css/hide_admin_original.css",) }
 
 class FichierAdherentsAdmin(admin.ModelAdmin):
 	model = FichierAdherents
+	list_per_page = 50
 	inlines = [AdherentDuFichierInline, ]
 
 admin.site.register(FichierAdherents, FichierAdherentsAdmin)
@@ -21,7 +27,7 @@ admin.site.register(FichierAdherents, FichierAdherentsAdmin)
 
 class AdherentDuFichierAdmin(admin.ModelAdmin):
 	model = AdherentDuFichier
-	list_per_page = 2000
+	list_per_page = 50
 	list_display = ("__str__", "num_adherent", "adherent", "fichier")
 	readonly_fields = (
 		"federation", "date_premiere_adhesion", "date_derniere_cotisation", "num_adherent", "genre", "nom", "prenom",

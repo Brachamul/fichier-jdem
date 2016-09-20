@@ -24,12 +24,12 @@
 	</div>
 	
 	<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 col-centered">
-		<div class="bignumber">{{ fichier.nombre_readhesions|length }}</div>
+		<div class="bignumber">{{ fichier.resubbed|length }}</div>
 		<h4>Réadhésions</h4>
 	</div>
 
 	<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 col-centered">
-		<div class="bignumber">0</div>
+		<div class="bignumber">{{ fichier.expired|length }}</div>
 		<h4>Non-renouvellements</h4>
 	</div>
 

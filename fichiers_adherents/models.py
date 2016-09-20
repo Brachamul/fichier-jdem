@@ -15,8 +15,6 @@ class FichierAdherents(models.Model):
 	importateur = models.ForeignKey(User)
 	slug = models.SlugField(max_length=255)
 	fichier_csv = models.FileField(upload_to='fichiers_adherents/')
-	nombre_nouveaux_adherents = models.PositiveSmallIntegerField(null=True, blank=True, default=0)
-	nombre_readhesions = models.PositiveSmallIntegerField(null=True, blank=True, default=0)
 
 	def adherents(self) :
 		''' liste les adherents ayant été importés par ce fichier '''
@@ -26,20 +24,26 @@ class FichierAdherents(models.Model):
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 		nouveaux_adherents = []
 		for adherent in self.adherents():
-			if adherent.est_nouveau() : nouveaux_adherents.append(adherent)
+			if adherent.is_new() :
+				nouveaux_adherents.append(adherent)
 		return nouveaux_adherents
 
-	def adherents_maj(self) :
+	def resubbed(self) :
 		''' liste le nombre d'adhérents qui ont réadhéré '''
 		adherents_maj = []
 		for adherent in self.adherents():
-			try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=adherent.num_adherent)
-			except Adherent.DoesNotExist : pass
-			else : 
-				if adherent.date_derniere_cotisation != adherent_actuel_correspondant.date_derniere_cotisation :
-					# si l'adhérent existe et qu'il a réadhéré
-					adherents_maj.append(adherent)
+			if adherent.has_resubbed() :
+				adherents_maj.append(adherent)
 		return adherents_maj
+
+	def expired(self):
+		expiration_window_end = self.date_ultime() - timedelta(days=730) # 2 years
+		expiration_window_start = expiration_window_end - timedelta(days=self.jours_depuis_le_fichier_precedent())
+		expired_people = Adherent.objects.filter(
+			date_derniere_cotisation__lt = expiration_window_end,
+			date_derniere_cotisation__gt = expiration_window_start
+			)
+		return expired_people
 
 	def date_ultime(self) :
 		''' cherche la dernière date mentionnée dans le fichier '''
@@ -47,11 +51,11 @@ class FichierAdherents(models.Model):
 		return latest_entry.date_derniere_cotisation
 
 	def jours_depuis_le_fichier_precedent(self) :
-		try : date_actuelle = Adherent.objects.latest('date_derniere_cotisation').date_derniere_cotisation
-		except Adherent.DoesNotExist : return False
+		try : date_du_fichier_actuel = Adherent.objects.latest('date_derniere_cotisation').date_derniere_cotisation
+		except Adherent.DoesNotExist :
+			return False
 		else :
-			jours = (date_actuelle - self.date_ultime()).days
-			return jours
+			return (self.date_ultime() - date_du_fichier_actuel).days
 
 	def __str__(self):
 		return self.slug
@@ -60,6 +64,7 @@ class FichierAdherents(models.Model):
 		verbose_name_plural = 'fichiers adhérents'.encode('utf-8')
 		permissions = (('peut_televerser', 'peut téléverser'),)
 		# if request.user.has_perm('fichiers_adhérents.peut_televerser')
+
 
 
 
@@ -150,10 +155,15 @@ class AdherentDuFichier(models.Model):
 	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élu dans une autre commune que sa ville de résidence.
 	canton = models.CharField(max_length=255, null=True, blank=True)
 
-	def est_nouveau(self):
+	def is_new(self):
 		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
 		except Adherent.DoesNotExist : return True
 		else : return False
+
+	def has_resubbed(self):
+		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
+		except Adherent.DoesNotExist : return False
+		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
 
 	def transferer_les_donnees_dun_adherent_du_fichier(self, adherent_de_la_base):
 		''' transfère les données du fichier adhérent vers la base '''

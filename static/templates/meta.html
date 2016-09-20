@@ -1,4 +1,4 @@
-{% load static %}
+{% load staticfiles %}
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -10,9 +10,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
-	<link rel="shortcut icon" href="{% get_static_prefix %}images/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="{%  static 'favicon.png' %}">
 
-	<title>{% block title %}EVANGELISATEUR{% endblock title %} - Phoning JDem</title>
+	<title>{% block title %}{% endblock title %}Fichier JDem</title>
 
 	{% block head %}{% endblock head %}
 
