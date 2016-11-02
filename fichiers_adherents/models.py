@@ -28,22 +28,22 @@ class FichierAdherents(models.Model):
 				nouveaux_adherents.append(adherent)
 		return nouveaux_adherents
 
-	def resubbed(self) :
-		''' liste le nombre d'adhérents qui ont réadhéré '''
-		adherents_maj = []
-		for adherent in self.adherents():
-			if adherent.has_resubbed() :
-				adherents_maj.append(adherent)
-		return adherents_maj
+#	def resubbed(self) :
+#		''' liste le nombre d'adhérents qui ont réadhéré '''
+#		adherents_maj = []
+#		for adherent in self.adherents():
+#			if adherent.has_resubbed() :
+#				adherents_maj.append(adherent)
+#		return adherents_maj
 
-	def expired(self):
-		expiration_window_end = self.date_ultime() - timedelta(days=730) # 2 years
-		expiration_window_start = expiration_window_end - timedelta(days=self.jours_depuis_le_fichier_precedent())
-		expired_people = Adherent.objects.filter(
-			date_derniere_cotisation__lt = expiration_window_end,
-			date_derniere_cotisation__gt = expiration_window_start
-			)
-		return expired_people
+#	def expired(self):
+#		expiration_window_end = self.date_ultime() - timedelta(days=730) # 2 years
+#		expiration_window_start = expiration_window_end - timedelta(days=self.jours_depuis_le_fichier_precedent())
+#		expired_people = Adherent.objects.filter(
+#			date_derniere_cotisation__lt = expiration_window_end,
+#			date_derniere_cotisation__gt = expiration_window_start
+#			)
+#		return expired_people
 
 	def date_ultime(self) :
 		''' cherche la dernière date mentionnée dans le fichier '''
@@ -51,7 +51,7 @@ class FichierAdherents(models.Model):
 		return latest_entry.date_derniere_cotisation
 
 	def jours_depuis_le_fichier_precedent(self) :
-		try : date_du_fichier_actuel = Adherent.objects.latest('date_derniere_cotisation').date_derniere_cotisation
+		try : date_du_fichier_actuel = DateDeCotisation.objects.latest('date').date
 		except Adherent.DoesNotExist :
 			return False
 		else :
@@ -72,7 +72,6 @@ class Adherent(models.Model):
 	# Ce profil reprend une partie des données du fichier adhérent officiel du MoDem. Il ne peut pas être modifié par l'utilisateur
 	federation = models.IntegerField(null=True, blank=True)
 	date_premiere_adhesion = models.DateField(null=True, blank=True)
-	date_derniere_cotisation = models.DateField(null=True, blank=True)
 	num_adherent = models.IntegerField(primary_key=True)
 	genre = models.CharField(max_length=5, null=True, blank=True)
 	nom = models.CharField(max_length=255, null=True, blank=True)
@@ -96,9 +95,13 @@ class Adherent(models.Model):
 	canton = models.CharField(max_length=255, null=True, blank=True)
 	importe_par_le_fichier = models.ForeignKey(FichierAdherents, null=True, blank=True, on_delete=models.SET_NULL)
 
-	def anciennete(self): return datetime.now() - self.date_premiere_adhesion
-	def actif(self): return (datetime.now().year - self.date_derniere_cotisation.year) > settings.DUREE_D_ACTIVITE
-	def jours_depuis_la_derniere_cotisation(self): return (datetime.now().date() - self.date_derniere_cotisation).days
+#	def anciennete(self): return datetime.now() - self.date_premiere_adhesion
+#	def actif(self): return (datetime.now().year - self.date_derniere_cotisation.year) > settings.DUREE_D_ACTIVITE
+#	def jours_depuis_la_derniere_cotisation(self): return (datetime.now().date() - self.date_derniere_cotisation).days
+
+	def date_derniere_cotisation():
+		return DateDeCotisation.objects.filter(adherents__in=self).order_by('-date')[0]
+
 	def nom_courant(self):
 		try : return self.prenom + " " + self.nom
 		except NameError : return "Anonyme"
@@ -114,10 +117,12 @@ class Adherent(models.Model):
 
 class DateDeCotisation(models.Model):
 
-	date = models.DateTimeField()
-	adherents = models.ManyToManyField(Adherent, related_name='adherents_du_jour')
+	date = models.DateField()
+	adherents = models.ManyToManyField(Adherent, related_name='adherents_ayant_cotise_ce_jour')
 
-	def __str__(self): return self.date.strftime('%Y-%m-%d')
+	def __str__(self):
+		try : return self.date.strftime('%Y-%m-%d')
+		except AttributeError : return "No Date"
 
 	class Meta:
 		verbose_name = "date de cotisation".encode('utf-8')
@@ -160,16 +165,16 @@ class AdherentDuFichier(models.Model):
 		except Adherent.DoesNotExist : return True
 		else : return False
 
-	def has_resubbed(self):
-		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
-		except Adherent.DoesNotExist : return False
-		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
+#	def has_resubbed(self):
+#		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
+#		except Adherent.DoesNotExist : return False
+#		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
 
 	def transferer_les_donnees_dun_adherent_du_fichier(self, adherent_de_la_base):
 		''' transfère les données du fichier adhérent vers la base '''
 		adherent_de_la_base.federation					= self.federation
 		adherent_de_la_base.date_premiere_adhesion		= self.date_premiere_adhesion
-		adherent_de_la_base.date_derniere_cotisation	= self.date_derniere_cotisation
+#		adherent_de_la_base.date_derniere_cotisation	= self.date_derniere_cotisation # traité différement pour garder l'historique
 		adherent_de_la_base.genre 						= self.genre
 		adherent_de_la_base.nom 						= self.nom
 		adherent_de_la_base.prenom 						= self.prenom

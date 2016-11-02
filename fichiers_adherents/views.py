@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import csv
 import logging
 import sys
@@ -51,8 +52,11 @@ def visualisation_du_fichier_adherent(request, fichier_id):
 @login_required
 def activer_le_fichier_adherent(request, fichier_id):
 	fichier = get_object_or_404(FichierAdherents, id=fichier_id)
-	for nouvel_adherent in fichier.nouveaux_adherents(): nouvel_adherent.creer_un_nouvel_adherent()
-	for adherent_maj in fichier.adherents_maj(): adherent_maj.mettre_a_jour_un_adherent()
+	for adherent_du_fichier in fichier.adherents() :
+		adherent,created = Adherent.objects.get_or_create(num_adherent=adherent_du_fichier.num_adherent)
+
+#	for nouvel_adherent in fichier.nouveaux_adherents(): nouvel_adherent.creer_un_nouvel_adherent()
+#	for adherent_maj in fichier.adherents_maj(): adherent_maj.mettre_a_jour_un_adherent()
 #	mettre_a_jour_les_federations() # recharge les permissions de vue sur les fédérations en cas de nouvelles fédérations
 	return render(request, 'fichiers_adherents/merci.html', {'page_title': "Merci !"})		
 
@@ -63,7 +67,6 @@ def importation(fichier):
 		lecteur = csv.DictReader(fichier_ouvert, delimiter=";")
 		for row in lecteur:
 			current_row += 1
-			print ()
 			nouvel_adherent = AdherentDuFichier(fichier=fichier)
 			nouvel_adherent.federation = row['Fédération']
 			nouvel_adherent.date_premiere_adhesion = process_csv_date(row['Date première adhésion'])
@@ -89,7 +92,6 @@ def importation(fichier):
 			nouvel_adherent.mandats = row['Mandats'].replace("\n", ", ")
 			nouvel_adherent.commune = row['Commune']
 			nouvel_adherent.commune = row['Canton']
-			print('...' + str(current_row) + ' {} {}'.format(nouvel_adherent.prenom, nouvel_adherent.nom))
 			nouvel_adherent.save()
 
 def process_csv_date(csv_date):
