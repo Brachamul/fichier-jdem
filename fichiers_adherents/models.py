@@ -18,7 +18,7 @@ class FichierAdherents(models.Model):
 
 	def adherents(self) :
 		''' liste les adherents ayant été importés par ce fichier '''
-		return AdherentDuFichier.objects.filter(fichier=self)
+		return Adherent.objects.filter(fichier=self)
 
 	def nouveaux_adherents(self) :
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
@@ -67,15 +67,21 @@ class FichierAdherents(models.Model):
 
 
 
-
 class Adherent(models.Model):
-	# Ce profil reprend une partie des données du fichier adhérent officiel du MoDem. Il ne peut pas être modifié par l'utilisateur
+	'''
+	Ce profil reprend une partie des données du fichier adhérent officiel du MoDem. Il ne peut pas être modifié par l'utilisateur
+	A chaque fois qu'un fichier est chargé et que des nouveaux adhérents,
+	ou des mises à jour d'adhérents sont détéctés, on créé une nouvelle instance d'Adhérent.
+	Un adhérent peut ainsi avoir plusieurs instances, représentant l'historique de son parcours.
+	'''
+	fichier = models.ForeignKey(FichierAdherents, null=True, blank=True, on_delete=models.SET_NULL)
+	num_adherent = models.IntegerField()
+	prenom = models.CharField(max_length=255, null=True, blank=True)
+	nom = models.CharField(max_length=255, null=True, blank=True)
 	federation = models.IntegerField(null=True, blank=True)
 	date_premiere_adhesion = models.DateField(null=True, blank=True)
-	num_adherent = models.IntegerField(primary_key=True)
+	date_derniere_cotisation = models.DateField(null=True, blank=True)
 	genre = models.CharField(max_length=5, null=True, blank=True)
-	nom = models.CharField(max_length=255, null=True, blank=True)
-	prenom = models.CharField(max_length=255, null=True, blank=True)
 	adresse1 = models.CharField(max_length=1000, null=True, blank=True)
 	adresse2 = models.CharField(max_length=1000, null=True, blank=True)
 	adresse3 = models.CharField(max_length=1000, null=True, blank=True)
@@ -91,20 +97,29 @@ class Adherent(models.Model):
 	tel_domicile = models.CharField(max_length=255, null=True, blank=True)
 	email = models.CharField(max_length=255, null=True, blank=True)
 	mandats = models.CharField(max_length=255, null=True, blank=True)
-	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élu dans une autre commune que sa ville de résidence.
+	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élue dans une autre commune que sa ville de résidence.
 	canton = models.CharField(max_length=255, null=True, blank=True)
-	importe_par_le_fichier = models.ForeignKey(FichierAdherents, null=True, blank=True, on_delete=models.SET_NULL)
 
-#	def anciennete(self): return datetime.now() - self.date_premiere_adhesion
-#	def actif(self): return (datetime.now().year - self.date_derniere_cotisation.year) > settings.DUREE_D_ACTIVITE
-#	def jours_depuis_la_derniere_cotisation(self): return (datetime.now().date() - self.date_derniere_cotisation).days
 
-	def date_derniere_cotisation():
-		return DateDeCotisation.objects.filter(adherents__in=self).order_by('-date')[0]
+
+	# Utilitaires
+	
+	def anciennete(self):
+		return datetime.now() - self.date_premiere_adhesion
+	
+	def actif(self):
+		return (datetime.now().year - self.date_derniere_cotisation.year) > settings.DUREE_D_ACTIVITE
+
+	def jours_depuis_la_derniere_cotisation(self):
+		return (datetime.now().date() - self.date_derniere_cotisation).days
 
 	def nom_courant(self):
 		try : return self.prenom + " " + self.nom
 		except NameError : return "Anonyme"
+
+
+
+	# Meta
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
 
@@ -115,66 +130,23 @@ class Adherent(models.Model):
 
 
 
-class DateDeCotisation(models.Model):
 
-	date = models.DateField()
-	adherents = models.ManyToManyField(Adherent, related_name='adherents_ayant_cotise_ce_jour')
-
-	def __str__(self):
-		try : return self.date.strftime('%Y-%m-%d')
-		except AttributeError : return "No Date"
-
-	class Meta:
-		verbose_name = "date de cotisation".encode('utf-8')
-		verbose_name_plural = "dates de cotisation".encode('utf-8')
-		ordering = ['-date']
-
-
-
-class AdherentDuFichier(models.Model):
-
-	fichier = models.ForeignKey(FichierAdherents)
-	adherent = models.ForeignKey(Adherent, null=True)
-	federation = models.IntegerField(null=True, blank=True)
-	date_premiere_adhesion = models.DateField(null=True, blank=True)
-	date_derniere_cotisation = models.DateField(null=True, blank=True)
-	num_adherent = models.IntegerField(primary_key=True)
-	genre = models.CharField(max_length=5, null=True, blank=True)
-	nom = models.CharField(max_length=255, null=True, blank=True)
-	prenom = models.CharField(max_length=255, null=True, blank=True)
-	adresse1 = models.CharField(max_length=1000, null=True, blank=True)
-	adresse2 = models.CharField(max_length=1000, null=True, blank=True)
-	adresse3 = models.CharField(max_length=1000, null=True, blank=True)
-	adresse4 = models.CharField(max_length=1000, null=True, blank=True)
-	code_postal = models.CharField(max_length=255, null=True, blank=True)
-	ville = models.CharField(max_length=255, null=True, blank=True)
-	pays = models.CharField(max_length=255, null=True, blank=True)
-	npai = models.CharField(max_length=255, null=True, blank=True)
-	date_de_naissance = models.DateField(null=True, blank=True)
-	profession = models.CharField(max_length=255, null=True, blank=True)
-	tel_portable = models.CharField(max_length=255, null=True, blank=True)
-	tel_bureau = models.CharField(max_length=255, null=True, blank=True)
-	tel_domicile = models.CharField(max_length=255, null=True, blank=True)
-	email = models.CharField(max_length=255, null=True, blank=True)
-	mandats = models.CharField(max_length=255, null=True, blank=True)
-	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élu dans une autre commune que sa ville de résidence.
-	canton = models.CharField(max_length=255, null=True, blank=True)
-
+'''
 	def is_new(self):
 		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
 		except Adherent.DoesNotExist : return True
 		else : return False
 
-#	def has_resubbed(self):
-#		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
-#		except Adherent.DoesNotExist : return False
-#		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
+	def has_resubbed(self):
+		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
+		except Adherent.DoesNotExist : return False
+		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
 
 	def transferer_les_donnees_dun_adherent_du_fichier(self, adherent_de_la_base):
-		''' transfère les données du fichier adhérent vers la base '''
-		adherent_de_la_base.federation					= self.federation
+'''		''' transfère les données du fichier adhérent vers la base '''
+'''		adherent_de_la_base.federation					= self.federation
 		adherent_de_la_base.date_premiere_adhesion		= self.date_premiere_adhesion
-#		adherent_de_la_base.date_derniere_cotisation	= self.date_derniere_cotisation # traité différement pour garder l'historique
+		adherent_de_la_base.date_derniere_cotisation	= self.date_derniere_cotisation # traité différement pour garder l'historique
 		adherent_de_la_base.genre 						= self.genre
 		adherent_de_la_base.nom 						= self.nom
 		adherent_de_la_base.prenom 						= self.prenom
@@ -205,23 +177,16 @@ class AdherentDuFichier(models.Model):
 
 
 	def creer_un_nouvel_adherent(self):
-		''' Ajoute un adhérent du fichier importé à la base '''
-		nouvel_adherent = Adherent(num_adherent=self.num_adherent)
+'''		''' Ajoute un adhérent du fichier importé à la base '''
+'''		nouvel_adherent = Adherent(num_adherent=self.num_adherent)
 		self.transferer_les_donnees_dun_adherent_du_fichier(nouvel_adherent)
 		nouvel_adherent.save()
 	
 	def mettre_a_jour_un_adherent(self):
-		''' Met à jour les adhérents existants avec les données du fichier importé '''
-		adherent_maj = Adherent.objects.get(num_adherent=self.num_adherent)
+'''		''' Met à jour les adhérents existants avec les données du fichier importé '''
+'''		adherent_maj = Adherent.objects.get(num_adherent=self.num_adherent)
 		self.transferer_les_donnees_dun_adherent_du_fichier(adherent_maj)
-
-	def __str__(self): return ('%s %s') % (self.prenom, self.nom)
-
-	class Meta:
-		verbose_name = "adhérent du fichier".encode('utf-8')
-		verbose_name_plural = "adhérents du fichier".encode('utf-8')
-		ordering = ['nom']
-
+'''
 
 
 class Note(models.Model):

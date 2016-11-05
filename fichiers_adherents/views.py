@@ -97,3 +97,16 @@ def importation(fichier):
 def process_csv_date(csv_date):
 	if csv_date : return datetime.strptime(csv_date, '%d/%m/%Y').date()
 	else : return None
+
+
+def adherents_actifs() :
+	''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
+	return Adherent.objects.all().order_by('date_derniere_cotisation').values_list('num_adherent', flat=True).distinct()
+	# can't use .distinct('num_adherent') on sqlite, so using .values_list('num_adherent', flat=True).distinct() instead
+
+def liste_des_adherents_actifs(request) :
+	adherents = []
+	for adherent in adherents_actifs():
+		print(adherent.prenom)
+
+	return HttpResponse(adherents)
