@@ -6,4 +6,4 @@ class TéléversementDuFichierAdherentForm(forms.ModelForm):
 
 	class Meta:
 		model = FichierAdherents
-		fields = ('fichier_csv',)
+		fields = ('fichier_csv', 'date')

@@ -12,9 +12,17 @@ from datetime import datetime, timedelta
 class FichierAdherents(models.Model):
 
 	date_d_import = models.DateTimeField(auto_now_add=True)
+	date = models.DateField()
 	importateur = models.ForeignKey(User)
 	slug = models.SlugField(max_length=255)
 	fichier_csv = models.FileField(upload_to='fichiers_adherents/')
+
+	def delete(self,*args,**kwargs):
+		# TODO : Doesn't seem to work :(
+		if os.path.isfile(self.fichier_csv.path):
+			os.remove(self.fichier_csv.path)
+
+		super(FichierAdherents, self).delete(*args,**kwargs)
 
 	def adherents(self) :
 		''' liste les adherents ayant été importés par ce fichier '''
@@ -24,45 +32,46 @@ class FichierAdherents(models.Model):
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 		nouveaux_adherents = []
 		for adherent in self.adherents():
-			if adherent.is_new() :
+			if adherent.is_new(fichier=self) :
 				nouveaux_adherents.append(adherent)
 		return nouveaux_adherents
 
-#	def resubbed(self) :
-#		''' liste le nombre d'adhérents qui ont réadhéré '''
-#		adherents_maj = []
-#		for adherent in self.adherents():
-#			if adherent.has_resubbed() :
-#				adherents_maj.append(adherent)
-#		return adherents_maj
+	def resubbed(self) :
+		''' liste le nombre d'adhérents qui ont réadhéré '''
+		adherents_maj = []
+		for adherent in self.adherents():
+			if adherent.has_resubbed(fichier=self) :
+				adherents_maj.append(adherent)
+		return adherents_maj
 
-#	def expired(self):
-#		expiration_window_end = self.date_ultime() - timedelta(days=730) # 2 years
-#		expiration_window_start = expiration_window_end - timedelta(days=self.jours_depuis_le_fichier_precedent())
-#		expired_people = Adherent.objects.filter(
-#			date_derniere_cotisation__lt = expiration_window_end,
-#			date_derniere_cotisation__gt = expiration_window_start
-#			)
-#		return expired_people
+	def expired(self):
+		expiration_window_end = self.date_de_ce_fichier() - timedelta(days=730) # 2 years
+		expiration_window_start = expiration_window_end - timedelta(days=self.jours_depuis_le_fichier_precedent())
+		expired_people = Adherent.objects.filter(
+			date_derniere_cotisation__lt = expiration_window_end,
+			date_derniere_cotisation__gt = expiration_window_start
+			)
+		return expired_people
 
-	def date_ultime(self) :
+	def date_de_ce_fichier(self) :
 		''' cherche la dernière date mentionnée dans le fichier '''
-		latest_entry = self.adherents().latest('date_derniere_cotisation')
+		latest_entry = self.adherents().latest()
 		return latest_entry.date_derniere_cotisation
 
 	def jours_depuis_le_fichier_precedent(self) :
-		try : date_du_fichier_actuel = DateDeCotisation.objects.latest('date').date
+		try : date_du_fichier_actuel = Adherent.objects.exclude(fichier=self).latest().date_derniere_cotisation
 		except Adherent.DoesNotExist :
 			return False
 		else :
-			return (self.date_ultime() - date_du_fichier_actuel).days
+			return (self.date_de_ce_fichier() - date_du_fichier_actuel).days
 
 	def __str__(self):
 		return self.slug
 
 	class Meta:
+		get_latest_by = "date_derniere_cotisation"
 		verbose_name_plural = 'fichiers adhérents'.encode('utf-8')
-		permissions = (('peut_televerser', 'peut téléverser'),)
+		permissions = (('peut_televerser', 'peut charger les nouveaux fichiers adhérents'),)
 		# if request.user.has_perm('fichiers_adhérents.peut_televerser')
 
 
@@ -74,7 +83,7 @@ class Adherent(models.Model):
 	ou des mises à jour d'adhérents sont détéctés, on créé une nouvelle instance d'Adhérent.
 	Un adhérent peut ainsi avoir plusieurs instances, représentant l'historique de son parcours.
 	'''
-	fichier = models.ForeignKey(FichierAdherents, null=True, blank=True, on_delete=models.SET_NULL)
+	fichier = models.ForeignKey(FichierAdherents, null=True, blank=True, on_delete=models.CASCADE)
 	num_adherent = models.IntegerField()
 	prenom = models.CharField(max_length=255, null=True, blank=True)
 	nom = models.CharField(max_length=255, null=True, blank=True)
@@ -117,6 +126,16 @@ class Adherent(models.Model):
 		try : return self.prenom + " " + self.nom
 		except NameError : return "Anonyme"
 
+	def is_new(self, fichier):
+		try : adherent_actuel_correspondant = Adherent.objects.filter(num_adherent=self.num_adherent).exclude(fichier=fichier).latest()
+		except Adherent.DoesNotExist : return True
+		else : return False
+
+	def has_resubbed(self, fichier):
+		try : adherent_actuel_correspondant = Adherent.objects.filter(num_adherent=self.num_adherent).exclude(fichier=fichier).latest()
+		except Adherent.DoesNotExist : return False
+		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
+
 
 
 	# Meta
@@ -125,72 +144,16 @@ class Adherent(models.Model):
 
 	class Meta:
 		ordering = ['nom']
+		get_latest_by = "date_derniere_cotisation"
+		permissions = (('acces_fichier', 'a accès au fichier national'),)
 		verbose_name = "adhérent".encode('utf-8')
 		verbose_name_plural = 'adhérents'.encode('utf-8')
 
 
 
-
-'''
-	def is_new(self):
-		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
-		except Adherent.DoesNotExist : return True
-		else : return False
-
-	def has_resubbed(self):
-		try : adherent_actuel_correspondant = Adherent.objects.get(num_adherent=self.num_adherent)
-		except Adherent.DoesNotExist : return False
-		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
-
-	def transferer_les_donnees_dun_adherent_du_fichier(self, adherent_de_la_base):
-'''		''' transfère les données du fichier adhérent vers la base '''
-'''		adherent_de_la_base.federation					= self.federation
-		adherent_de_la_base.date_premiere_adhesion		= self.date_premiere_adhesion
-		adherent_de_la_base.date_derniere_cotisation	= self.date_derniere_cotisation # traité différement pour garder l'historique
-		adherent_de_la_base.genre 						= self.genre
-		adherent_de_la_base.nom 						= self.nom
-		adherent_de_la_base.prenom 						= self.prenom
-		adherent_de_la_base.adresse1 					= self.adresse1
-		adherent_de_la_base.adresse2 					= self.adresse2
-		adherent_de_la_base.adresse3 					= self.adresse3
-		adherent_de_la_base.adresse4 					= self.adresse4
-		adherent_de_la_base.code_postal 				= self.code_postal
-		adherent_de_la_base.ville 						= self.ville
-		adherent_de_la_base.pays 						= self.pays
-		adherent_de_la_base.npai 						= self.npai
-		adherent_de_la_base.date_de_naissance 			= self.date_de_naissance
-		adherent_de_la_base.profession 					= self.profession
-		adherent_de_la_base.tel_portable 				= self.tel_portable
-		adherent_de_la_base.tel_bureau 					= self.tel_bureau
-		adherent_de_la_base.tel_domicile 				= self.tel_domicile
-		adherent_de_la_base.email 						= self.email
-		adherent_de_la_base.mandats 					= self.mandats
-		adherent_de_la_base.commune 					= self.commune
-		adherent_de_la_base.canton 						= self.canton
-
-		adherent_de_la_base.importe_par_le_fichier 		= self.fichier
-		adherent_de_la_base.save()
-
-		date_de_cotisation,created = DateDeCotisation.objects.get_or_create(date=self.date_derniere_cotisation)
-		date_de_cotisation.adherents.add(adherent_de_la_base)
-		# permet de sauvegarder un historique des cotisations
-
-
-	def creer_un_nouvel_adherent(self):
-'''		''' Ajoute un adhérent du fichier importé à la base '''
-'''		nouvel_adherent = Adherent(num_adherent=self.num_adherent)
-		self.transferer_les_donnees_dun_adherent_du_fichier(nouvel_adherent)
-		nouvel_adherent.save()
-	
-	def mettre_a_jour_un_adherent(self):
-'''		''' Met à jour les adhérents existants avec les données du fichier importé '''
-'''		adherent_maj = Adherent.objects.get(num_adherent=self.num_adherent)
-		self.transferer_les_donnees_dun_adherent_du_fichier(adherent_maj)
-'''
-
-
 class Note(models.Model):
 
+	# todo : activate that
 	target = models.ForeignKey(Adherent, related_name='notes')
 	author = models.ForeignKey(User)
 	text = models.CharField(max_length=1024)
@@ -202,8 +165,20 @@ class Note(models.Model):
 
 class WrongNumber(models.Model):
 
+	# todo : fix that
 	adherent = models.ForeignKey(Adherent)
 	reported_by = models.ForeignKey(User)
 	date = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self): return self.adherent
+
+
+
+class Droits(models.Model):
+	name = models.CharField(max_length=250)
+	users = models.ManyToManyField(User)
+	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
+
+	class Meta:
+		verbose_name = "droit d'accès".encode('utf-8')
+		verbose_name_plural = "droits d'accès".encode('utf-8')

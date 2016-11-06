@@ -34,7 +34,7 @@ class NotesInline(admin.TabularInline):
 class AdherentAdmin(admin.ModelAdmin):
 	model = Adherent
 	inlines = [NotesInline, ]
-	list_per_page = 50
+	list_per_page = 1000
 	list_display = ("num_adherent", "nom", "prenom", "federation", "email", "fichier")
 	readonly_fields = (
 		"federation", "date_premiere_adhesion", "date_derniere_cotisation", "num_adherent", "genre", "nom", "prenom",
