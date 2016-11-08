@@ -145,7 +145,7 @@ class Adherent(models.Model):
 	class Meta:
 		ordering = ['nom']
 		get_latest_by = "date_derniere_cotisation"
-		permissions = (('acces_fichier', 'a accès au fichier national'),)
+		permissions = (('lecture_fichier_national', 'peut lire le fichier national'),)
 		verbose_name = "adhérent".encode('utf-8')
 		verbose_name_plural = 'adhérents'.encode('utf-8')
 

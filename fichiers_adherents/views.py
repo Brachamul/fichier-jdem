@@ -57,6 +57,7 @@ def visualisation_du_fichier_adherent(request, fichier_id):
 		})
 
 
+
 @login_required
 def liste_des_adherents_actifs(request) :
 	print(adherents_actifs())
@@ -65,6 +66,24 @@ def liste_des_adherents_actifs(request) :
 		print(adherent.prenom)
 
 	return HttpResponse(adherents)
+
+
+
+@login_required
+def query_checker(request, query):
+	if request.user.has_perm('fichiers_adherents.lecture_fichier_national'):
+		query = ast.literal_eval(operation.query) # transform string query into dictionary
+		object_list = Adherent.objects.filter(**query)
+		admin_url = reverse('admin:fichiers_adherents_adherent_changelist')
+		return render(request, 'list.html', {
+			'page_title': "Query Checker",
+			'object_list': object_list,
+			'admin_url': admin_url,
+			})
+	else :
+		messages.error(request, "Vous n'avez pas le droit de lecture sur le fichier national des adhérents.")
+		return redirect('/')
+
 
 
 
