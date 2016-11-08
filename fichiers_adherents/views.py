@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import csv
-import logging
-import sys
+import csv, logging, sys, random, ast
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 from django.db.models import Max, F
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
@@ -18,10 +17,12 @@ from django.template import RequestContext
 from .models import *
 from .forms import *
 
+'''
 @login_required
 def dashboard(request):
 	if request.user.has_perm('fichiers_adherents.peut_televerser'):
-	
+'''	
+
 
 @login_required
 def televersement(request):
@@ -70,21 +71,26 @@ def liste_des_adherents_actifs(request) :
 
 
 @login_required
-def query_checker(request, query):
+def query_checker(request):
 	if request.user.has_perm('fichiers_adherents.lecture_fichier_national'):
-		query = ast.literal_eval(operation.query) # transform string query into dictionary
-		object_list = Adherent.objects.filter(**query)
-		admin_url = reverse('admin:fichiers_adherents_adherent_changelist')
-		return render(request, 'list.html', {
+		object_list = []
+		query = ""
+		if request.method == "POST":
+			query = request.POST.get('query')
+		try:
+			query_dict = ast.literal_eval(query)
+			object_list = Adherent.objects.filter(**query_dict)
+		except ValueError as e:
+			messages.error(request, repr(e))
+		return render(request, 'fichiers_adherents/query_checker.html', {
 			'page_title': "Query Checker",
+			'query': query,
 			'object_list': object_list,
-			'admin_url': admin_url,
+			'admin_url': reverse('admin:fichiers_adherents_adherent_changelist'),
 			})
 	else :
 		messages.error(request, "Vous n'avez pas le droit de lecture sur le fichier national des adhérents.")
 		return redirect('/')
-
-
 
 
 ''' HELPER FUNCTIONS '''
