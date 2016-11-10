@@ -7,3 +7,6 @@ class TéléversementDuFichierAdherentForm(forms.ModelForm):
 	class Meta:
 		model = FichierAdherents
 		fields = ('fichier_csv', 'date')
+		widgets = {
+			'date': forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}),
+		}

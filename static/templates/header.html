@@ -1,23 +1,33 @@
-<nav class="navbar navbar-light bg-faded">
-	<button class="navbar-toggler hidden-sm-up" type="button" data-toggle="collapse" data-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
-		&#9776;
-	</button>
-	<div class="collapse navbar-toggleable-xs" id="main-nav">
-		<a class="navbar-brand" href="#">Fichier JDem</a>
-		<ul class="nav navbar-nav">
-			<li class="nav-item active">
-				{% if not user.is_authenticated %}
-				<a class="nav-link" href="{% url 'login' %}"><i class="fa fa-power-on"></i> Connexion</a>
-				{% endif %}
-			</li>
-			<!--
-			<li class="nav-item">
-				<a class="nav-link" href=""><i class="fa fa-plus"></i> Proposer un nouveau trajet</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href=""><i class="fa fa-plus"></i> Proposer un nouveau trajet</a>
-			</li>
-			-->
-		</ul>
-	</div>
-</nav>
+<br/>
+<div class="container">
+	<nav class="navbar navbar-dark bg-inverse">
+		<div>
+			<a class="navbar-brand" href="#">
+				<img src="/static/Purchase Order-104.png" height="30"
+				style="display: inline-block; margin-right: .25em; position: relative; top: -.1em;"/>
+				Fichier JDem
+			</a>
+		</div>
+		<button class="navbar-toggler hidden-sm-up" type="button"
+		data-toggle="collapse" data-target="#main-nav" aria-controls="main-nav"
+		aria-expanded="false" aria-label="Toggle navigation">
+			&#9776;
+		</button>
+		<div class="collapse navbar-toggleable-xs" id="main-nav">
+			<ul class="nav navbar-nav">
+				<li class="nav-item active">
+					{% if not user.is_authenticated %}
+					<a class="nav-link" href="{% url 'login' %}"><i class="fa fa-power-on"></i> Connexion</a>
+					{% endif %}
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'phoning_operations' %}"></i> Phoning</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'televersement_du_fichier_adhérent' %}"></i> Fichier</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+</div>
+<br/>

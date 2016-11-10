@@ -74,7 +74,7 @@ def liste_des_adherents_actifs(request) :
 def query_checker(request):
 	if request.user.has_perm('fichiers_adherents.lecture_fichier_national'):
 		object_list = []
-		query = ""
+		query = "{}"
 		if request.method == "POST":
 			query = request.POST.get('query')
 		try:
@@ -127,12 +127,7 @@ def importation(fichier):
 			nouvel_adherent.mandats = row['Mandats'].replace("\n", ", ")
 			nouvel_adherent.commune = row['Commune']
 			nouvel_adherent.commune = row['Canton']
-#			ancien_adherent = Adherent.objects.filter(
-#				num_adherent=nouvel_adherent.num_adherent,
-#				date_derniere_cotisation=nouvel_adherent.date_derniere_cotisation
-#				).latest()
-			if nouvel_adherent != ancien_adherent :
-				nouvel_adherent.save()
+			nouvel_adherent.save()
 
 def process_csv_date(csv_date):
 	if csv_date : return datetime.strptime(csv_date, '%d/%m/%Y').date()
