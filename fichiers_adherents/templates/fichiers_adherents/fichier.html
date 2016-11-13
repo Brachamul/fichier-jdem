@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}{{ block.super }}
+
+<div class="col-sm-12">
+
+{% if page_title %}<h1>{{ page_title }} ({{ adherents|length }}) :</h1>{% endif %}
+
+<div><!-- Actions -->
+{% for action in list_actions %}
+	<a href="{{ action.href }}" class="btn btn-secondary">
+		{{ action.text }}
+	</a>
+{% endfor %}
+</div>
+
+{% if user.is_staff and admin_url and adherents|length > 10 %}
+<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+{% endif %}
+
+<hr/>
+
+
+{% for adherent in adherents %}
+<div>
+
+	<a href="{% url 'adherent' adherent.num_adherent %}">
+	
+		{% if adherent.title %}<h2>{{ adherent.title }}</h2>{% endif %}
+		
+		{% if adherent.name %}<h4>{{ adherent.name }}</h4>{% endif %}
+
+		{% if adherent.username %}<h4>{{ adherent.username }}</h4>{% endif %}
+
+		{% if adherent.prenom or adherent.nom %}<h4>{{ adherent.nom }} {{ adherent.prenom }}</h4>{% endif %}
+	
+	{% if url_by_id or url_by_slug %}</a>{% endif %}
+
+	{% if adherent.text %}<p>{{ adherent.text }}</p>{% endif %}
+
+	{% if adherent.created or adherent.created_by %}
+
+		<p style="font-size: .8em; color: #666">
+		{% if adherent.created and adherent.created_by %}
+			{{ adherent.created|date:"Y-m-d à H:i" }}, par {{ adherent.created_by }}
+		{% elif adherent.created %}
+			{{ adherent.created|date:"Y-m-d à H:i" }}
+		{% elif adherent.created_by %}
+			par {{ adherent.created_by }}
+		{% endif %}
+		</p>
+
+	{% endif %}
+
+</div>
+<hr/>
+{% endfor %}
+
+
+
+{% if not adherents %}
+
+<p>Cette liste est vide.</p>
+
+{% endif %}
+
+
+
+{% if user.is_staff and admin_url %}
+<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+{% endif %}
+
+</div> <!--columns-->
+
+{% endblock content %}
+
+
+
+{% block scripts %}{{ block.super }}
+
+{% endblock scripts %}
+

@@ -27,7 +27,7 @@ admin.site.register(FichierAdherents, FichierAdherentsAdmin)
 
 class NotesInline(admin.TabularInline):
 	model = Note
-	list_per_page = 2000
+	list_per_page = 1000
 	fk_name = 'target'
 	extra = 0
 
@@ -35,12 +35,12 @@ class AdherentAdmin(admin.ModelAdmin):
 	model = Adherent
 	inlines = [NotesInline, ]
 	list_per_page = 1000
-	list_display = ("num_adherent", "nom", "prenom", "federation", "email", "fichier")
+	list_display = ("num_adherent", "actuel", "nom", "prenom", "federation", "email", "fichier")
 	readonly_fields = (
-		"federation", "date_premiere_adhesion", "date_derniere_cotisation", "num_adherent", "genre", "nom", "prenom",
+		"actuel", "num_adherent", "genre", "nom", "prenom", "federation", "date_premiere_adhesion", "date_derniere_cotisation",
 		"adresse1", "adresse2", "adresse3", "adresse4", "code_postal", "ville", "pays", "npai", "date_de_naissance",
 		"profession", "tel_portable", "tel_bureau", "tel_domicile", "email", "mandats", "commune", "canton",
-		"fichier", )
+		"fichier")
 	# TODO : derniere date de cotis !
 admin.site.register(Adherent, AdherentAdmin)
 
@@ -52,3 +52,11 @@ class NoteAdmin(admin.ModelAdmin):
 	list_display = ("target", "author", "text", "date")
 
 admin.site.register(Note, NoteAdmin)
+
+
+
+class DroitsAdmin(admin.ModelAdmin):
+	model = Droits
+	list_per_page = 1000
+
+admin.site.register(Droits, DroitsAdmin)

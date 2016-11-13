@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
-import os
-from django.utils.text import slugify
+import os, uuid
+
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models import Max, F
+
 from datetime import datetime, timedelta
 
 
@@ -14,7 +16,6 @@ class FichierAdherents(models.Model):
 	date_d_import = models.DateTimeField(auto_now_add=True)
 	date = models.DateField()
 	importateur = models.ForeignKey(User)
-	slug = models.SlugField(max_length=255)
 	fichier_csv = models.FileField(upload_to='fichiers_adherents/')
 
 	def delete(self,*args,**kwargs):
@@ -66,7 +67,7 @@ class FichierAdherents(models.Model):
 			return (self.date_de_ce_fichier() - date_du_fichier_actuel).days
 
 	def __str__(self):
-		return self.slug
+		return "Fichier du {}, importé le {} par {}".format(self.date, self.date_d_import.date(), self.importateur)
 
 	class Meta:
 		get_latest_by = "date_derniere_cotisation"
@@ -83,8 +84,9 @@ class Adherent(models.Model):
 	ou des mises à jour d'adhérents sont détéctés, on créé une nouvelle instance d'Adhérent.
 	Un adhérent peut ainsi avoir plusieurs instances, représentant l'historique de son parcours.
 	'''
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) # UUID instead of normal incremental ID
 	fichier = models.ForeignKey(FichierAdherents, null=True, blank=True, on_delete=models.CASCADE)
-	num_adherent = models.IntegerField()
+	num_adherent = models.IntegerField(verbose_name="Numéro d'adhérent")
 	prenom = models.CharField(max_length=255, null=True, blank=True)
 	nom = models.CharField(max_length=255, null=True, blank=True)
 	federation = models.IntegerField(null=True, blank=True)
@@ -108,6 +110,7 @@ class Adherent(models.Model):
 	mandats = models.CharField(max_length=255, null=True, blank=True)
 	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élue dans une autre commune que sa ville de résidence.
 	canton = models.CharField(max_length=255, null=True, blank=True)
+	actuel = models.BooleanField(default=False) # valeur calculée, voir actualisation_des_adherents()
 
 
 
@@ -150,6 +153,21 @@ class Adherent(models.Model):
 		verbose_name_plural = 'adhérents'.encode('utf-8')
 
 
+def actualisation_des_adherents() :
+	'''
+	Les adhérents ont chacun plusieurs lignes dans la base, puisque leurs données
+	sont copiées à chaque import du fichier. Cette fonction sélectionne, pour chaque adhérent,
+	une seule ligne considéré comme la plus à jour, et la marque d'un "actuel=True"
+	'''
+	Adherent.objects.all().update(actuel=False) # Reset
+	for adherent in Adherent.objects.values('num_adherent').annotate(date_du_ficher=Max('fichier__date')) :
+		adherent = Adherent.objects.get(num_adherent=adherent['num_adherent'], fichier__date=adherent['date_du_ficher'])
+		adherent.actuel = True
+		adherent.save()
+		print(adherent)
+
+
+
 
 class Note(models.Model):
 
@@ -182,3 +200,5 @@ class Droits(models.Model):
 	class Meta:
 		verbose_name = "droit d'accès".encode('utf-8')
 		verbose_name_plural = "droits d'accès".encode('utf-8')
+
+	def __str__(self): return self.name

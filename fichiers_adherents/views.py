@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import csv, logging, sys, random, ast
+import csv, logging, sys, random, ast, json
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -11,6 +11,9 @@ from django.db.models import Max, F
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.template import RequestContext
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView, DetailView
+
 
 #	from datascope.models import mettre_a_jour_les_federations
 
@@ -33,12 +36,12 @@ def televersement(request):
 				logging.info("A new adherent file was uploaded by {user}.".format(user=request.user).encode('utf8'))
 				fichier = request.FILES['fichier_csv']
 				importateur = request.user
-				slug = request.POST.get('slug')
 				date = request.POST.get('date')
-				fichier.name = ('fichiers_adherents/' + slug + '.csv') # renomme le fichier grâce au slug
-				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date, slug=slug) # rattache le fichier à la base des fichiers importés
+				fichier.name = ('fichiers_adherents/' + date + '_' + request.user.username + '.csv') # renomme le fichier
+				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
 				nouveau_fichier.save()
 				importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
+				actualisation_des_adherents()
 				return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
 			else:
 				return render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
@@ -56,18 +59,6 @@ def visualisation_du_fichier_adherent(request, fichier_id):
 		'page_title': "Visualisation d'un fichier adhérent",
 		'fichier': fichier,
 		})
-
-
-
-@login_required
-def liste_des_adherents_actifs(request) :
-	print(adherents_actifs())
-	adherents = []
-	for adherent in adherents_actifs():
-		print(adherent.prenom)
-
-	return HttpResponse(adherents)
-
 
 
 @login_required
@@ -93,6 +84,8 @@ def query_checker(request):
 		return redirect('/')
 
 
+
+
 ''' HELPER FUNCTIONS '''
 
 def importation(fichier):
@@ -102,40 +95,115 @@ def importation(fichier):
 		lecteur = csv.DictReader(fichier_ouvert, delimiter=";")
 		for row in lecteur:
 			current_row += 1
-			nouvel_adherent = Adherent(fichier=fichier)
-			nouvel_adherent.federation = row['Fédération']
-			nouvel_adherent.date_premiere_adhesion = process_csv_date(row['Date première adhésion'])
-			nouvel_adherent.date_derniere_cotisation = process_csv_date(row['Date dernière cotisation'])
-			nouvel_adherent.num_adherent = row['Num adhérent']
-			nouvel_adherent.genre = row['Genre']
-			nouvel_adherent.nom = row['Nom']
-			nouvel_adherent.prenom = row['Prénom']
-			nouvel_adherent.adresse1 = row['Adresse 1']
-			nouvel_adherent.adresse2 = row['Adresse 2']
-			nouvel_adherent.adresse3 = row['Adresse 3']
-			nouvel_adherent.adresse4 = row['Adresse 4']
-			nouvel_adherent.code_postal = row['Code postal']
-			nouvel_adherent.ville = row['Ville']
-			nouvel_adherent.pays = row['Pays']
-			nouvel_adherent.npai = row['NPAI']
-			nouvel_adherent.date_de_naissance = process_csv_date(row['Date de naissance'])
-			nouvel_adherent.profession = row['Profession']
-			nouvel_adherent.tel_portable = row['Tel portable']
-			nouvel_adherent.tel_bureau = row['Tel bureau']
-			nouvel_adherent.tel_domicile = row['Tel domicile']
-			nouvel_adherent.email = row['Email'].lower()
-			nouvel_adherent.mandats = row['Mandats'].replace("\n", ", ")
-			nouvel_adherent.commune = row['Commune']
-			nouvel_adherent.commune = row['Canton']
-			nouvel_adherent.save()
+			nouvel_adherent, created = Adherent.objects.get_or_create(
+				fichier=fichier,
+				federation = row['Fédération'],
+				date_premiere_adhesion = process_csv_date(row['Date première adhésion']),
+				date_derniere_cotisation = process_csv_date(row['Date dernière cotisation']),
+				num_adherent = row['Num adhérent'],
+				genre = homme_ou_femme(row['Genre']),
+				nom = row['Nom'],
+				prenom = row['Prénom'],
+				adresse1 = row['Adresse 1'],
+				adresse2 = row['Adresse 2'],
+				adresse3 = row['Adresse 3'],
+				adresse4 = row['Adresse 4'],
+				code_postal = row['Code postal'],
+				ville = row['Ville'],
+				pays = row['Pays'],
+				npai = row['NPAI'],
+				date_de_naissance = process_csv_date(row['Date de naissance']),
+				profession = row['Profession'],
+				tel_portable = row['Tel portable'],
+				tel_bureau = row['Tel bureau'],
+				tel_domicile = row['Tel domicile'],
+				email = row['Email'].lower(),
+				mandats = row['Mandats'].replace("\n", ", "),
+				commune = row['Commune'],
+				canton = row['Canton'],
+				)
 
 def process_csv_date(csv_date):
 	if csv_date : return datetime.strptime(csv_date, '%d/%m/%Y').date()
 	else : return None
 
+def homme_ou_femme(title):
+	if title == "Mlle" or title == 'Mme' : return "F"
+	elif title == "M." : return "H"
+	else : return "?"
 
 def adherents_actifs() :
 	''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 	return Adherent.objects.annotate(max_date=Max('date_derniere_cotisation')).filter(date_derniere_cotisation=F('max_date'))
 	# can't use Adherent.objects.all().order_by('date_derniere_cotisation').distinct('num_adherent') on sqlite, so using .values_list('num_adherent', flat=True).distinct() instead
 
+
+@method_decorator(login_required, name='dispatch')
+class ListeDesAdherents(ListView):
+
+	model = Adherent
+	template_name = 'list.html'
+
+	def get_context_data(self, **kwargs):
+
+		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
+		context['object_list'] = Adherent.objects.filter(actuel=True)
+		context['list_actions'] = [
+			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
+			{'text': 'Administrer', 'url': reverse('admin:fichiers_adherents_adherent_changelist')},
+			]
+		context['page_title'] = 'Liste des Adhérents'
+		context['url_by_id'] = True
+		return context
+
+
+
+def actualiser_les_adherents(request) :
+	if request.user.has_perm('fichiers_adherents.peut_televerser'):
+		actualisation_des_adherents()
+		return redirect('fichier__adherents')
+	else:
+		messages.error(request, "Vous n'avez pas les droits d'accès au téléversement du fichier des adhérents.")
+		return redirect('/')
+
+@method_decorator(login_required, name='dispatch')
+class Fichier(ListView):
+
+	model = Adherent
+	template_name = 'fichiers_adherents/fichier.html'
+
+	def get_context_data(self, **kwargs):
+		context = super(Fichier, self).get_context_data(**kwargs)
+
+		droits = self.request.user.droits_set.all()
+		departements = set()
+		for droits in droits :
+			query = json.loads(droits.query)
+			if type(query) is list :
+				for departement in query :
+					departements.add(departement)
+			else :
+				departements.add(query)
+		departements = list(departements)
+
+		context['adherents'] = Adherent.objects.filter(actuel=True, federation__in=departements)
+		context['departements'] = departements
+		context['page_title'] = 'Fichier des adhérents'
+		return context
+
+
+
+@method_decorator(login_required, name='dispatch')
+class AdherentDetail(DetailView):
+
+	model = Adherent
+	template_name = 'detail.html'
+	pk_url_kwarg = "num_adherent"
+	
+
+	def get_context_data(self, **kwargs):
+		context = super(AdherentDetail, self).get_context_data(**kwargs)
+		print("==============")
+		print(kwargs)
+		print("==============")
+		return context

@@ -7,8 +7,16 @@
 
 {% if page_title %}<h1>{{ page_title }} ({{ object_list|length }}) :</h1>{% endif %}
 
+<div><!-- Actions -->
+{% for action in list_actions %}
+	<a href="{{ action.href }}" class="btn btn-secondary">
+		{{ action.text }}
+	</a>
+{% endfor %}
+</div>
+
 {% if user.is_staff and admin_url and object_list|length > 10 %}
-<p><a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
 {% endif %}
 
 <hr/>
@@ -68,7 +76,7 @@
 
 
 {% if user.is_staff and admin_url %}
-<p><a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
 {% endif %}
 
 </div> <!--columns-->
