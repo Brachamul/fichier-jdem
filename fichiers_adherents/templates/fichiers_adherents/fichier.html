@@ -16,7 +16,15 @@
 
 <div class="col-sm-12">
 
-{% if page_title %}<h1>{{ page_title }} [ {{ adherents|length }} ]</h1>{% endif %}
+{% if page_title %}
+	<h1>
+		{{ page_title }} [ {{ adherents|length }} ]
+		<a id="download-csv" href="#" download="fichier.csv" class="btn btn-primary"><i class="fa fa-download"></i> Télécharger</a>
+	</h1>
+{% endif %}
+
+
+
 
 {% if user.droits_set.all %}
 	<p>Vous avez les droits de consultation pour : {% for droits in user.droits_set.all %}<span class="tag tag-default">{{ droits }}</span>{% endfor %}</p>
@@ -112,7 +120,7 @@ a[href^='tel'] { display: block; }
 
 // CSV generator function
 function csvify(data) {
-	var csvContent = "data:text/csv;charset=utf-8,"
+	var csvContent = "data:text/csv;charset=utf-8,\uFEFF"
 	data.forEach(function(infoArray, index){
 	
 		dataString = infoArray.join(";")
@@ -122,7 +130,7 @@ function csvify(data) {
 	return encodeURI(csvContent)
 }
 	
-var data = [
+window.csvData = [[
 	"num_adherent", "prenom", "nom", "federation",
 	"date_premiere_adhesion", "date_derniere_cotisation", "genre",
 	"adresse1", "adresse2", "adresse3", "adresse4",
@@ -138,17 +146,10 @@ var data = [
 	"{{ adherent.date_de_naissance }}", "{{ adherent.profession }}",
 	"{{ adherent.tel_portable }}", "{{ adherent.tel_bureau }}", "{{ adherent.tel_domicile }}", "{{ adherent.email }}",
 	"{{ adherent.mandats }}", "{{ adherent.commune }}", "{{ adherent.canton }}"
-]{% if not forloop.last %},{% endif %} // comma if not last item
-{% endfor %}
+]{% if not forloop.last %},{% endif %}
+{% endfor %}]
 
-
-var link = document.createElement("a")
-link.innerHTML = "CSV"
-link.setAttribute("href", csvify(data))
-link.setAttribute("download", "fichier.csv")
-link.setAttribute("class", "btn btn-primary")
-document.body.appendChild(link) // Required for FF
-
+document.getElementById("download-csv").setAttribute("href", csvify(csvData))
 
 </script>
 
