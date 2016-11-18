@@ -8,7 +8,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.4/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
 	<link rel="shortcut icon" href="{%  static 'favicon.png' %}">
 
@@ -20,28 +20,28 @@
 
 <body style="background-color: #fafafa">
 
-<header>
-	{% block header %}{% endblock header %}
-</header>
+	<header>
+		{% block header %}{% endblock header %}
+	</header>
 
-<div id="main-container" class="container main-container" >
-	{% block messages %}{% if messages %}<div class="col-sm-12">{% include "messages.html" %}</div>{% endif %}{% endblock messages %}
-	{% block content %}{% endblock content %}
-</div>
+	<div id="main-container" class="container-fluid main-container" >
+		{% block messages %}{% if messages %}<div class="col-sm-12">{% include "messages.html" %}</div>{% endif %}{% endblock messages %}
+		{% block content %}{% endblock content %}
+	</div>
 
-<footer class="endpage">
-	{% block footer %}{% endblock footer %}
-</footer>	
-
+	<footer class="endpage">
+		{% block footer %}{% endblock footer %}
+	</footer>	
+	
+</body>
 	
 {% block scripts %}
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/js/bootstrap.min.js"></script>
 	<script>$('.alert').alert() // enable bootstrap 4 alert dismissal</script>
 
 {% endblock scripts %}
 
-</body>
 
 </html>

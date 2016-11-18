@@ -138,26 +138,6 @@ def adherents_actifs() :
 	# can't use Adherent.objects.all().order_by('date_derniere_cotisation').distinct('num_adherent') on sqlite, so using .values_list('num_adherent', flat=True).distinct() instead
 
 
-@method_decorator(login_required, name='dispatch')
-class ListeDesAdherents(ListView):
-
-	model = Adherent
-	template_name = 'list.html'
-
-	def get_context_data(self, **kwargs):
-
-		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
-		context['object_list'] = Adherent.objects.filter(actuel=True)
-		context['list_actions'] = [
-			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
-			{'text': 'Administrer', 'url': reverse('admin:fichiers_adherents_adherent_changelist')},
-			]
-		context['page_title'] = 'Liste des Adhérents'
-		context['url_by_id'] = True
-		return context
-
-
-
 def actualiser_les_adherents(request) :
 	if request.user.has_perm('fichiers_adherents.peut_televerser'):
 		actualisation_des_adherents()
@@ -166,44 +146,49 @@ def actualiser_les_adherents(request) :
 		messages.error(request, "Vous n'avez pas les droits d'accès au téléversement du fichier des adhérents.")
 		return redirect('/')
 
+
+
 @method_decorator(login_required, name='dispatch')
-class Fichier(ListView):
+class ListeDesAdherents(ListView):
 
 	model = Adherent
 	template_name = 'fichiers_adherents/fichier.html'
 
 	def get_context_data(self, **kwargs):
-		context = super(Fichier, self).get_context_data(**kwargs)
-
-		droits = self.request.user.droits_set.all()
-		departements = set()
-		for droits in droits :
-			query = json.loads(droits.query)
-			if type(query) is list :
-				for departement in query :
-					departements.add(departement)
-			else :
-				departements.add(query)
-		departements = list(departements)
-
-		context['adherents'] = Adherent.objects.filter(actuel=True, federation__in=departements)
-		context['departements'] = departements
+		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
+		context['adherents'] = adherents_visibles(self.request.user)
 		context['page_title'] = 'Fichier des adhérents'
+		context['list_actions'] = [
+			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
+			{'text': 'Administrer', 'url': reverse('admin:fichiers_adherents_adherent_changelist')},
+			]
 		return context
 
 
+def adherents_visibles(user):
+	# Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir
+	droits = user.droits_set.all()
+	departements = set()
+	for droits in droits :
+		query = json.loads(droits.query)
+		if type(query) is list :
+			for departement in query :
+				departements.add(departement)
+		else :
+			departements.add(query)
+	departements = list(departements)
+	return Adherent.objects.filter(actuel=True, federation__in=departements)
 
-@method_decorator(login_required, name='dispatch')
-class AdherentDetail(DetailView):
 
-	model = Adherent
-	template_name = 'detail.html'
-	pk_url_kwarg = "num_adherent"
-	
+@login_required
+def VueAdherent(request, num_adherent):
 
-	def get_context_data(self, **kwargs):
-		context = super(AdherentDetail, self).get_context_data(**kwargs)
-		print("==============")
-		print(kwargs)
-		print("==============")
-		return context
+	adherent = get_object_or_404(Adherent, num_adherent=num_adherent, actuel=True)
+	if adherent in adherents_visibles(request.user) :
+		return render(request, 'fichiers_adherents/adherent.html', {
+			'adherent': adherent,
+			'page_title': adherent.nom_courant(),
+			})
+	else :
+		messages.error(request, "Vous n'êtes pas autorisé à consulter ce profil.")
+		return redirect('fichier')

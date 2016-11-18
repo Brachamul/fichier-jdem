@@ -1,63 +1,77 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+
+
+{% block head %}{{ block.super }}
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/css/tether.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+
+{% endblock head %}
+
+
+
 {% block content %}{{ block.super }}
 
 <div class="col-sm-12">
 
-{% if page_title %}<h1>{{ page_title }} ({{ adherents|length }}) :</h1>{% endif %}
+{% if page_title %}<h1>{{ page_title }} [ {{ adherents|length }} ]</h1>{% endif %}
 
-<div><!-- Actions -->
-{% for action in list_actions %}
-	<a href="{{ action.href }}" class="btn btn-secondary">
-		{{ action.text }}
-	</a>
-{% endfor %}
-</div>
-
-{% if user.is_staff and admin_url and adherents|length > 10 %}
-<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+{% if user.droits_set.all %}
+	<p>Vous avez les droits de consultation pour : {% for droits in user.droits_set.all %}<span class="tag tag-default">{{ droits }}</span>{% endfor %}</p>
 {% endif %}
 
-<hr/>
+<div class="table-responsive">
 
+<table class="table table-sm table-hover table-striped">
 
-{% for adherent in adherents %}
-<div>
+	<thead class="thead-inverse">
+		<tr>
+			<th class="center">Numéro</th>
+			<th class="center">Cotisation</th>
+			<th class="center">Dpt</th>
+			<th>Ville</th>
+			<th>Nom</th>
+			<th>Prénom</th>
+			<th>Âge</th>
+			<th>Tels</th>
+			<th>Email</th>
+		</tr>
+	</thead>
 
-	<a href="{% url 'adherent' adherent.num_adherent %}">
-	
-		{% if adherent.title %}<h2>{{ adherent.title }}</h2>{% endif %}
-		
-		{% if adherent.name %}<h4>{{ adherent.name }}</h4>{% endif %}
+	<tbody>
 
-		{% if adherent.username %}<h4>{{ adherent.username }}</h4>{% endif %}
+		{% for adherent in adherents %}
+		<tr>
+			<td class="center">{{ adherent.num_adherent }}</td>
+			<td class="center">
+				<span data-toggle="tooltip" title="Première adhésion il y a {{ adherent.date_premiere_adhesion|timesince }}">
+					{{ adherent.date_derniere_cotisation|date:"Y-m" }}
+				</span>
+			</td>
+			<td class="center">{{ adherent.federation }}</td>
+			<td>{{ adherent.ville }}</td>
+			<td><a href="{% url 'adherent' adherent.num_adherent %}">{{ adherent.nom }}</a></td>
+			<td><a href="{% url 'adherent' adherent.num_adherent %}">{{ adherent.prenom }}</a></td>
+			<td>{{ adherent.date_de_naissance|timesince }}</td>
+			<td>
+				{% if adherent.tel_portable %}<a href="tel:{{ adherent.tel_portable }}">{{ adherent.tel_portable }}</a>{% endif %}
+				{% if adherent.tel_bureau %}<a href="tel:{{ adherent.tel_bureau }}">{{ adherent.tel_bureau }}</a>{% endif %}
+				{% if adherent.tel_domicile %}<a href="tel:{{ adherent.tel_domicile }}">{{ adherent.tel_domicile }}</a>{% endif %}
+			</td>
+			<td>{{ adherent.email }}</td>
+		</tr>
+		{% endfor %}		
 
-		{% if adherent.prenom or adherent.nom %}<h4>{{ adherent.nom }} {{ adherent.prenom }}</h4>{% endif %}
-	
-	{% if url_by_id or url_by_slug %}</a>{% endif %}
-
-	{% if adherent.text %}<p>{{ adherent.text }}</p>{% endif %}
-
-	{% if adherent.created or adherent.created_by %}
-
-		<p style="font-size: .8em; color: #666">
-		{% if adherent.created and adherent.created_by %}
-			{{ adherent.created|date:"Y-m-d à H:i" }}, par {{ adherent.created_by }}
-		{% elif adherent.created %}
-			{{ adherent.created|date:"Y-m-d à H:i" }}
-		{% elif adherent.created_by %}
-			par {{ adherent.created_by }}
-		{% endif %}
-		</p>
-
-	{% endif %}
+	</tbody>
+</table>
 
 </div>
-<hr/>
-{% endfor %}
 
-
+{% comment %}
+	TODO make new adherents go <tr class="table-success">...</tr> and maybe old ones go <tr class="table-warning">...</tr>
+{% endcomment %}
 
 {% if not adherents %}
 
@@ -73,11 +87,69 @@
 
 </div> <!--columns-->
 
+<style>
+
+td.center, th.center { text-align: center; }
+
+a[href^='tel'] { display: block; }
+
+</style>
+
+
 {% endblock content %}
 
 
 
 {% block scripts %}{{ block.super }}
 
-{% endblock scripts %}
 
+<!-- Activate bootstrap tooltips -->
+<script>jQuery('[data-toggle="tooltip"]').tooltip()</script>
+
+
+<!-- CSV Downloader-->
+<script>
+
+// CSV generator function
+function csvify(data) {
+	var csvContent = "data:text/csv;charset=utf-8,"
+	data.forEach(function(infoArray, index){
+	
+		dataString = infoArray.join(";")
+		csvContent += index < data.length ? dataString+ "\n" : dataString;
+	
+	});
+	return encodeURI(csvContent)
+}
+	
+var data = [
+	"num_adherent", "prenom", "nom", "federation",
+	"date_premiere_adhesion", "date_derniere_cotisation", "genre",
+	"adresse1", "adresse2", "adresse3", "adresse4",
+	"code_postal", "ville", "pays", "npai",
+	"date_de_naissance", "profession",
+	"tel_portable", "tel_bureau", "tel_domicile", "email",
+	"mandats", "commune", "canton"
+], {% for adherent in adherents %} [
+	"{{ adherent.num_adherent }}", "{{ adherent.prenom }}", "{{ adherent.nom }}", "{{ adherent.federation }}",
+	"{{ adherent.date_premiere_adhesion }}", "{{ adherent.date_derniere_cotisation }}", "{{ adherent.genre }}",
+	"{{ adherent.adresse1 }}", "{{ adherent.adresse2 }}", "{{ adherent.adresse3 }}", "{{ adherent.adresse4 }}",
+	"{{ adherent.code_postal }}", "{{ adherent.ville }}", "{{ adherent.pays }}", "{{ adherent.npai }}",
+	"{{ adherent.date_de_naissance }}", "{{ adherent.profession }}",
+	"{{ adherent.tel_portable }}", "{{ adherent.tel_bureau }}", "{{ adherent.tel_domicile }}", "{{ adherent.email }}",
+	"{{ adherent.mandats }}", "{{ adherent.commune }}", "{{ adherent.canton }}"
+]{% if not forloop.last %},{% endif %} // comma if not last item
+{% endfor %}
+
+
+var link = document.createElement("a")
+link.innerHTML = "CSV"
+link.setAttribute("href", csvify(data))
+link.setAttribute("download", "fichier.csv")
+link.setAttribute("class", "btn btn-primary")
+document.body.appendChild(link) // Required for FF
+
+
+</script>
+
+{% endblock scripts %}
