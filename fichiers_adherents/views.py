@@ -40,6 +40,7 @@ def declaration_cnil(request):
 				nouvelle_declaration = Cnil(user=request.user, lieu=lieu, signature=signature)
 				nouvelle_declaration.save()
 				messages.success(request, "Votre signature de la déclaration de confidentialité a bien été enregistrée.")
+				return redirect('fichier')
 			elif signature != required_signature or not lieu :
 				if signature != required_signature :
 					messages.error(request, 'Votre signature doit mentionner les mots : "{}"'.format(required_signature))

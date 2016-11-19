@@ -15,7 +15,9 @@
 			{% bootstrap_icon "ok" %} Se connecter
 		</button>
 	{% endbuttons %}
+		{% comment %} This doesn't work for some reason, it goes back to the login page
 		<p style="text-align: center; font-size: .8em;"><a href="{% url 'password_reset' %}">Mot de passe oublié ?</a></p>
+		{% endcomment %}
 		<p style="text-align: center; font-size: .8em;">Pour obtenir un compte, appeler Antonin !</p>
 </form>
 
