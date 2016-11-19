@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-
 {% block head %}{{ block.super }}
 
 <title>Téléverser un fichier adhérents</title>
@@ -21,17 +20,11 @@
 
 
 <form id="upload_form" method="post" action="" enctype="multipart/form-data">
-    <div class="panel panel-default">
-        <div class="panel-body">
-            {% csrf_token %}
-            {{ upload_form.as_p }}
-         </div>
-        <div class="panel-footer">
-            <input type="hidden" class="small button" name="slug" value="{% now 'Y-m-d' %}_{% now 'H-i' %}_{{ user.username }}">
-            <input type="submit" name="submit" value="Téléverser" class="btn btn-primary">
-        </div>
-    </div>
-
+	<div class="form-group">
+		{% csrf_token %}
+		{{ upload_form }}
+	</div>
+	<input type="submit" name="submit" value="Téléverser" class="btn btn-primary">
 </form>
 
 

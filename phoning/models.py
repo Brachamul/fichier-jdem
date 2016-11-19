@@ -3,7 +3,6 @@ import os
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.text import slugify
 from datetime import datetime, timedelta
 from fichiers_adherents.models import Adherent
 

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block content %}{{ block.super }}
+
+<div style="max-width: 640px; margin: auto;">
+
+<h1>Déclaration de confidentialité</h1>
+
+<form action="" method="POST">
+{% csrf_token %}
+<p style="font-style: italic;">Les données à caractère personnel relatives à des opinions politiques sont, évidemment, des données sensibles auxquelles il convient de porter une attention particulière.</p>
+<p>Je soussigné(e) {{ user.first_name }} {{ user.last_name }} affirme avoir pris connaissance du <a href="https://www.cnil.fr/sites/default/files/typo/document/CNIL_Politique.pdf" target="_blank">guide pratique de la CNIL</a> concernant l'utilisation des fichiers dans le cadre d’activités politiques. Je m’engage à respecter, de façon absolue, les obligations suivantes :</p>
+<ul>
+<li>ne prendre aucune copie des documents et supports d’informations confiés, à l’exception de celles nécessaires pour les besoins de mes fonctions</li>
+<li>ne pas utiliser les documents et informations traités à des fins autres que celles de ma mission</li>
+<li>ne pas divulguer ces documents ou informations à d’autres personnes, qu’il s’agisse de personnes privées ou publiques, physiques ou morales</li>
+<li>prendre toutes les mesures permettant d’éviter une utilisation détournée ou frauduleuse des fichiers</li>
+<li>prendre toutes les mesures, notamment de sécurité matérielle, pour assurer la conservation des documents et informations traités tout au long de sa mission</li>
+<li>détruire, à l'issue de ma mission, tous fichiers manuscrits ou informatisés stockant ces informations</li>
+</ul>
+
+<p>Le fichier des adhérents, fourni dans le cadre de cette mission, reste la propriété des Jeunes Démocrates. A ce titre, également, la sous-traitance est interdite sans l'accord exprès du Président ou du Secrétaire général des Jeunes Démocrates.</p>
+
+<p>Le président des Jeunes Démocrates pourra prononcer la fin immédiate des fonctions de l'intéressé ainsi que la restitution des fichiers en cas de non-respect des dispositions précitées, conformément au règlement intérieur des Jeunes Démocrates.</p>
+
+<p>Fait à <input class="form-control" type="text" name="lieu" placeholder="Lieu" value="{{ lieu }}"/></p>
+
+<p>
+Inscrivez la mention "Lu et approuvé par {{ user.first_name }} {{ user.last_name }}"<br/>
+<input class="form-control" type="text" name="signature" placeholder="Lu et approuvé..." value="{{ signature }}">
+</p>
+
+<p>
+	<button type="submit" class="btn btn-lg btn-primary btn-block"><i class="fa fa-pencil-square-o"></i> En cliquant sur ce bouton, je signe la déclaration</button>
+</p>
+</form>
+
+<br/><br/>
+
+</div>
+
+{% endblock content %}

@@ -1,20 +1,56 @@
-import csv
-import logging
-import sys
+# -*- coding: utf-8 -*-
+import csv, logging, sys, random, ast, json
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.db.models import Max, F
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.template import RequestContext
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView, DetailView
+
 
 #	from datascope.models import mettre_a_jour_les_federations
 
 from .models import *
 from .forms import *
+
+'''
+@login_required
+def dashboard(request):
+	if request.user.has_perm('fichiers_adherents.peut_televerser'):
+'''	
+
+
+@login_required
+def declaration_cnil(request):
+	form_values = {}
+	try : cnil = Cnil.objects.get(user=request.user)
+	except ObjectDoesNotExist :
+		if request.method == "POST":
+			signature = request.POST.get('signature').lower()
+			required_signature = "Lu et approuvé par {} {}".format(request.user.first_name, request.user.last_name).lower()
+			lieu = request.POST.get('lieu')
+			if signature == required_signature and lieu  :
+				nouvelle_declaration = Cnil(user=request.user, lieu=lieu, signature=signature)
+				nouvelle_declaration.save()
+				messages.success(request, "Votre signature de la déclaration de confidentialité a bien été enregistrée.")
+			elif signature != required_signature or not lieu :
+				if signature != required_signature :
+					messages.error(request, 'Votre signature doit mentionner les mots : "{}"'.format(required_signature))
+				if not lieu :
+					messages.error(request, "Vous devez renseigner le lieu de signature.")
+			else :
+				messages.error(request, "Désolé, nous n'avons pas réussi à enregistrer votre signature.")
+			form_values = {'lieu': lieu, 'signature': signature}
+		return render(request, 'fichiers_adherents/cnil.html', form_values)
+	else : return redirect('fichier')
+
 
 @login_required
 def televersement(request):
@@ -25,11 +61,12 @@ def televersement(request):
 				logging.info("A new adherent file was uploaded by {user}.".format(user=request.user).encode('utf8'))
 				fichier = request.FILES['fichier_csv']
 				importateur = request.user
-				slug = request.POST.get('slug')
-				fichier.name = ('fichiers_adherents/' + slug + '.csv') # renomme le fichier grâce au slug
-				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, slug=slug) # rattache le fichier à la base des fichiers importés
+				date = request.POST.get('date')
+				fichier.name = ('fichiers_adherents/' + date + '_' + request.user.username + '.csv') # renomme le fichier
+				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
 				nouveau_fichier.save()
-				importation(nouveau_fichier) # Importe les données du fichier dans la base "AdherentDuFichier"
+				importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
+				actualisation_des_adherents()
 				return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
 			else:
 				return render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
@@ -48,50 +85,144 @@ def visualisation_du_fichier_adherent(request, fichier_id):
 		'fichier': fichier,
 		})
 
+
 @login_required
-def activer_le_fichier_adherent(request, fichier_id):
-	fichier = get_object_or_404(FichierAdherents, id=fichier_id)
-	for nouvel_adherent in fichier.nouveaux_adherents(): nouvel_adherent.creer_un_nouvel_adherent()
-	for adherent_maj in fichier.adherents_maj(): adherent_maj.mettre_a_jour_un_adherent()
-#	mettre_a_jour_les_federations() # recharge les permissions de vue sur les fédérations en cas de nouvelles fédérations
-	return render(request, 'fichiers_adherents/merci.html', {'page_title': "Merci !"})		
+def query_checker(request):
+	if request.user.has_perm('fichiers_adherents.lecture_fichier_national'):
+		object_list = []
+		query = "{}"
+		if request.method == "POST":
+			query = request.POST.get('query')
+		try:
+			query_dict = ast.literal_eval(query)
+			object_list = Adherent.objects.filter(**query_dict)
+		except ValueError as e:
+			messages.error(request, repr(e))
+		return render(request, 'fichiers_adherents/query_checker.html', {
+			'page_title': "Query Checker",
+			'query': query,
+			'object_list': object_list,
+			'admin_url': reverse('admin:fichiers_adherents_adherent_changelist'),
+			})
+	else :
+		messages.error(request, "Vous n'avez pas le droit de lecture sur le fichier national des adhérents.")
+		return redirect('/')
+
+
+
+
+''' HELPER FUNCTIONS '''
 
 def importation(fichier):
-	# Lis le fichier CSV importé et crée une instance AdherentDuFichier pour chacun d'entre eux
+	# Lis le fichier CSV importé et crée une instance Adherent pour chacun d'entre eux
 	current_row = 0
 	with open(settings.MEDIA_ROOT + '/' + fichier.fichier_csv.name, encoding="cp1252", newline='') as fichier_ouvert:
 		lecteur = csv.DictReader(fichier_ouvert, delimiter=";")
 		for row in lecteur:
 			current_row += 1
-			print ()
-			nouvel_adherent = AdherentDuFichier(fichier=fichier)
-			nouvel_adherent.federation = row['Fédération']
-			nouvel_adherent.date_premiere_adhesion = process_csv_date(row['Date première adhésion'])
-			nouvel_adherent.date_derniere_cotisation = process_csv_date(row['Date dernière cotisation'])
-			nouvel_adherent.num_adherent = row['Num adhérent']
-			nouvel_adherent.genre = row['Genre']
-			nouvel_adherent.nom = row['Nom']
-			nouvel_adherent.prenom = row['Prénom']
-			nouvel_adherent.adresse1 = row['Adresse 1']
-			nouvel_adherent.adresse2 = row['Adresse 2']
-			nouvel_adherent.adresse3 = row['Adresse 3']
-			nouvel_adherent.adresse4 = row['Adresse 4']
-			nouvel_adherent.code_postal = row['Code postal']
-			nouvel_adherent.ville = row['Ville']
-			nouvel_adherent.pays = row['Pays']
-			nouvel_adherent.npai = row['NPAI']
-			nouvel_adherent.date_de_naissance = process_csv_date(row['Date de naissance'])
-			nouvel_adherent.profession = row['Profession']
-			nouvel_adherent.tel_portable = row['Tel portable']
-			nouvel_adherent.tel_bureau = row['Tel bureau']
-			nouvel_adherent.tel_domicile = row['Tel domicile']
-			nouvel_adherent.email = row['Email'].lower()
-			nouvel_adherent.mandats = row['Mandats'].replace("\n", ", ")
-			nouvel_adherent.commune = row['Commune']
-			nouvel_adherent.commune = row['Canton']
-			print('...' + str(current_row) + ' {} {}'.format(nouvel_adherent.prenom, nouvel_adherent.nom))
-			nouvel_adherent.save()
+			nouvel_adherent, created = Adherent.objects.get_or_create(
+				fichier=fichier,
+				federation = row['Fédération'],
+				date_premiere_adhesion = process_csv_date(row['Date première adhésion']),
+				date_derniere_cotisation = process_csv_date(row['Date dernière cotisation']),
+				num_adherent = row['Num adhérent'],
+				genre = homme_ou_femme(row['Genre']),
+				nom = row['Nom'],
+				prenom = row['Prénom'],
+				adresse1 = row['Adresse 1'],
+				adresse2 = row['Adresse 2'],
+				adresse3 = row['Adresse 3'],
+				adresse4 = row['Adresse 4'],
+				code_postal = row['Code postal'],
+				ville = row['Ville'],
+				pays = row['Pays'],
+				npai = row['NPAI'],
+				date_de_naissance = process_csv_date(row['Date de naissance']),
+				profession = row['Profession'],
+				tel_portable = row['Tel portable'],
+				tel_bureau = row['Tel bureau'],
+				tel_domicile = row['Tel domicile'],
+				email = row['Email'].lower(),
+				mandats = row['Mandats'].replace("\n", ", "),
+				commune = row['Commune'],
+				canton = row['Canton'],
+				)
 
 def process_csv_date(csv_date):
 	if csv_date : return datetime.strptime(csv_date, '%d/%m/%Y').date()
 	else : return None
+
+def homme_ou_femme(title):
+	if title == "Mlle" or title == 'Mme' : return "F"
+	elif title == "M." : return "H"
+	else : return "?"
+
+def adherents_actifs() :
+	''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
+	return Adherent.objects.annotate(max_date=Max('date_derniere_cotisation')).filter(date_derniere_cotisation=F('max_date'))
+	# can't use Adherent.objects.all().order_by('date_derniere_cotisation').distinct('num_adherent') on sqlite, so using .values_list('num_adherent', flat=True).distinct() instead
+
+
+def actualiser_les_adherents(request) :
+	if request.user.has_perm('fichiers_adherents.peut_televerser'):
+		actualisation_des_adherents()
+		return redirect('fichier__adherents')
+	else:
+		messages.error(request, "Vous n'avez pas les droits d'accès au téléversement du fichier des adhérents.")
+		return redirect('/')
+
+
+
+@method_decorator(login_required, name='dispatch')
+class ListeDesAdherents(ListView):
+
+	model = Adherent
+	template_name = 'fichiers_adherents/fichier.html'
+
+	def dispatch(self, request, *args, **kwargs):
+		try : cnil = Cnil.objects.get(user=request.user)
+		except ObjectDoesNotExist : return redirect('fichier__declaration_cnil')
+		else: return super(ListeDesAdherents, self).dispatch(request, *args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
+		context['adherents'] = adherents_visibles(self.request)
+		context['page_title'] = 'Fichier des adhérents'
+		context['list_actions'] = [
+			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
+			{'text': 'Administrer', 'url': reverse('admin:fichiers_adherents_adherent_changelist')},
+			]
+		return context
+
+
+def adherents_visibles(request):
+	# Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir
+	try : droits = request.user.accesfichier.droits_set.all()
+	except ObjectDoesNotExist :
+		messages.error(request, "Vous n'avez pas de droits d'accès au fichier.")
+		return []
+	else :
+		departements = set()
+		for droits in droits :
+			query = json.loads(droits.query)
+			if type(query) is list :
+				for departement in query :
+					departements.add(departement)
+			else :
+				departements.add(query)
+		departements = list(departements)
+		return Adherent.objects.filter(actuel=True, federation__in=departements)
+
+
+@login_required
+def VueAdherent(request, num_adherent):
+
+	adherent = get_object_or_404(Adherent, num_adherent=num_adherent, actuel=True)
+	if adherent in adherents_visibles(request) :
+		return render(request, 'fichiers_adherents/adherent.html', {
+			'adherent': adherent,
+			'page_title': adherent.nom_courant(),
+			})
+	else :
+		messages.error(request, "Vous n'êtes pas autorisé à consulter ce profil.")
+		return redirect('fichier')

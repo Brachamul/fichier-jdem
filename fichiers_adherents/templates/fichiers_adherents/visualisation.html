@@ -30,15 +30,14 @@
 
 	<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 col-centered">
 		<div class="bignumber">{{ fichier.expired|length }}</div>
-		<h4>Non-renouvellements</h4>
+		<h4>Expirations</h4>
 	</div>
 
 </div>
 
 <br/>
 
-<p><a id="load-dat-file" class="btn btn-lg btn-primary" href="{% url 'activer_le_fichier_adherent' fichier_id=fichier.id %}" >Charger ce fichier dans la base</a></p>
-<p>Daté du <strong>{{ fichier.date_ultime }}</strong>,
+<p>Daté du <strong>{{ fichier.date_de_ce_fichier }}</strong>,
 {% if fichier.jours_depuis_le_fichier_precedent > 0 %}
 ce fichier est <strong>plus récent</strong> que le précédent de <strong>{{ fichier.jours_depuis_le_fichier_precedent }} jours</strong>.
 {% elif fichier.jours_depuis_le_fichier_precedent < 0 %}
@@ -62,7 +61,7 @@ ce fichier est daté du <strong>même jour</strong> que le fichier actuel (ou il
 	</tr>
 	</thead>
 	<tbody>
-	{% for adherent in fichier.adherentdufichier_set.all %}
+	{% for adherent in fichier.adherent_set.all %}
 	<tr>
 		<td>{{ adherent.num_adherent }}</td>
 		<td>{{ adherent.nom }}</td>

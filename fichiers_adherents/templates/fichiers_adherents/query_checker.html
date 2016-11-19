@@ -7,20 +7,19 @@
 
 {% if page_title %}<h1>{{ page_title }} ({{ object_list|length }}) :</h1>{% endif %}
 
-<div><!-- Actions -->
-{% for action in list_actions %}
-	<a href="{{ action.url }}" class="btn btn-secondary">
-		{{ action.text }}
-	</a>
-{% endfor %}
-</div>
+<form action="" method="post" action="" enctype="multipart/form-data" class="form-inline">
+	{% csrf_token %}
+	<div class="form-group">
+		<input class="form-control" placeholder="Entrez votre requête ici" name="query" value="{{ query }}"></input>
+		<button type="submit" class="btn btn-primary">Go</button>
+	</div>
+</form>
 
 {% if user.is_staff and admin_url and object_list|length > 10 %}
-<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+<p><a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
 {% endif %}
 
 <hr/>
-
 
 {% for object in object_list %}
 <div>
@@ -76,7 +75,7 @@
 
 
 {% if user.is_staff and admin_url %}
-<p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
+<p><a class="btn btn-default" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
 {% endif %}
 
 </div> <!--columns-->
