@@ -71,7 +71,8 @@ class FichierAdherents(models.Model):
 
 	class Meta:
 		get_latest_by = "date_derniere_cotisation"
-		verbose_name_plural = 'fichiers adhérents'.encode('utf-8')
+		verbose_name = 'fichier'
+		verbose_name_plural = 'fichiers'
 		permissions = (('peut_televerser', 'peut charger les nouveaux fichiers adhérents'),)
 		# if request.user.has_perm('fichiers_adhérents.peut_televerser')
 
@@ -169,7 +170,7 @@ def actualisation_des_adherents() :
 
 class Note(models.Model):
 
-	# todo : activate that
+	# todo : make that no longer tied to an adhérent but to a numéro adhérent
 	target = models.ForeignKey(Adherent, related_name='notes')
 	author = models.ForeignKey(User)
 	text = models.CharField(max_length=1024)
@@ -189,10 +190,17 @@ class WrongNumber(models.Model):
 	def __str__(self): return self.adherent
 
 
+class AccesFichier(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+	date = models.DateTimeField(auto_now=True)
+	class Meta :
+		verbose_name = "Lecteur"
+		verbose_name_plural = "Lecteurs"
+	def __str__(self): return str(self.user)
 
 class Droits(models.Model):
 	name = models.CharField(max_length=250)
-	users = models.ManyToManyField(User, blank=True)
+	readers = models.ManyToManyField(AccesFichier, blank=True)
 	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
 
 	class Meta:
@@ -206,8 +214,8 @@ class Cnil(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 	signature = models.CharField(max_length=255)
 	lieu = models.CharField(max_length=255, verbose_name="fait à")
-	date = models.DateTimeField(auto_now=True)
+	date = models.DateTimeField(auto_now_add=True)
 	class Meta :
 		verbose_name = "Déclaration CNIL"
 		verbose_name_plural = "Déclarations CNIL"
-	def __str__(self): return self.user
+	def __str__(self): return str(self.user)

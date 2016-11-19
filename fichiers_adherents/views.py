@@ -186,7 +186,7 @@ class ListeDesAdherents(ListView):
 
 	def get_context_data(self, **kwargs):
 		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
-		context['adherents'] = adherents_visibles(self.request.user)
+		context['adherents'] = adherents_visibles(self.request)
 		context['page_title'] = 'Fichier des adhérents'
 		context['list_actions'] = [
 			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
@@ -195,26 +195,30 @@ class ListeDesAdherents(ListView):
 		return context
 
 
-def adherents_visibles(user):
+def adherents_visibles(request):
 	# Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir
-	droits = user.droits_set.all()
-	departements = set()
-	for droits in droits :
-		query = json.loads(droits.query)
-		if type(query) is list :
-			for departement in query :
-				departements.add(departement)
-		else :
-			departements.add(query)
-	departements = list(departements)
-	return Adherent.objects.filter(actuel=True, federation__in=departements)
+	try : droits = request.user.accesfichier.droits_set.all()
+	except ObjectDoesNotExist :
+		messages.error(request, "Vous n'avez pas de droits d'accès au fichier.")
+		return []
+	else :
+		departements = set()
+		for droits in droits :
+			query = json.loads(droits.query)
+			if type(query) is list :
+				for departement in query :
+					departements.add(departement)
+			else :
+				departements.add(query)
+		departements = list(departements)
+		return Adherent.objects.filter(actuel=True, federation__in=departements)
 
 
 @login_required
 def VueAdherent(request, num_adherent):
 
 	adherent = get_object_or_404(Adherent, num_adherent=num_adherent, actuel=True)
-	if adherent in adherents_visibles(request.user) :
+	if adherent in adherents_visibles(request) :
 		return render(request, 'fichiers_adherents/adherent.html', {
 			'adherent': adherent,
 			'page_title': adherent.nom_courant(),

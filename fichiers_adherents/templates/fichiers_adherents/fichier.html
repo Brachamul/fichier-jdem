@@ -27,7 +27,9 @@
 
 
 {% if user.droits_set.all %}
-	<p>Vous avez les droits de consultation pour : {% for droits in user.droits_set.all %}<span class="tag tag-default">{{ droits }}</span> {% endfor %}</p>
+	<p>Vous avez les droits de consultation pour :
+		{% for droits in user.accesfichier.droits_set.all %}<span class="tag tag-default">{{ droits }}</span> {% endfor %}
+	</p>
 {% endif %}
 
 <div class="table-responsive">

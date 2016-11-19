@@ -3,28 +3,6 @@ from django.contrib import admin
 from .models import *
 
 
-
-class AdherentInline(admin.TabularInline):
-	# For each feature, display development projects that can improve it
-	model = Adherent
-	list_per_page = 50
-	fk_name = 'fichier'
-	extra = 0
-	fields = ("genre", "nom", "prenom", "federation", "ville", "email", "tel_portable", "num_adherent",)
-	readonly_fields = fields
-
-	class Media:
-		css = { "all" : ("css/hide_admin_original.css",) }
-
-class FichierAdherentsAdmin(admin.ModelAdmin):
-	model = FichierAdherents
-	list_per_page = 50
-	inlines = [AdherentInline, ]
-
-admin.site.register(FichierAdherents, FichierAdherentsAdmin)
-
-
-
 class NotesInline(admin.TabularInline):
 	model = Note
 	list_per_page = 1000
@@ -44,6 +22,16 @@ class AdherentAdmin(admin.ModelAdmin):
 	# TODO : derniere date de cotis !
 admin.site.register(Adherent, AdherentAdmin)
 
+
+class DroitsInline(admin.TabularInline):
+	model = Droits.readers.through
+
+class AccesFichierAdmin(admin.ModelAdmin):
+	model = AccesFichier
+	inlines = [DroitsInline, ]
+	list_per_page = 1000
+
+admin.site.register(AccesFichier, AccesFichierAdmin)
 
 
 class NoteAdmin(admin.ModelAdmin):
@@ -66,3 +54,24 @@ class CnilAdmin(admin.ModelAdmin):
 	list_per_page = 1000
 
 admin.site.register(Cnil, CnilAdmin)
+
+
+
+class AdherentInline(admin.TabularInline):
+	# For each feature, display development projects that can improve it
+	model = Adherent
+	list_per_page = 50
+	fk_name = 'fichier'
+	extra = 0
+	fields = ("genre", "nom", "prenom", "federation", "ville", "email", "tel_portable", "num_adherent",)
+	readonly_fields = fields
+
+	class Media:
+		css = { "all" : ("css/hide_admin_original.css",) }
+
+class FichierAdherentsAdmin(admin.ModelAdmin):
+	model = FichierAdherents
+	list_per_page = 50
+	inlines = [AdherentInline, ]
+
+admin.site.register(FichierAdherents, FichierAdherentsAdmin)
