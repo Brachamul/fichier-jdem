@@ -164,8 +164,6 @@ def actualisation_des_adherents() :
 		adherent = Adherent.objects.get(num_adherent=adherent['num_adherent'], fichier__date=adherent['date_du_ficher'])
 		adherent.actuel = True
 		adherent.save()
-		print(adherent)
-
 
 
 
@@ -194,7 +192,7 @@ class WrongNumber(models.Model):
 
 class Droits(models.Model):
 	name = models.CharField(max_length=250)
-	users = models.ManyToManyField(User)
+	users = models.ManyToManyField(User, blank=True)
 	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
 
 	class Meta:
@@ -209,3 +207,7 @@ class Cnil(models.Model):
 	signature = models.CharField(max_length=255)
 	lieu = models.CharField(max_length=255, verbose_name="fait à")
 	date = models.DateTimeField(auto_now=True)
+	class Meta :
+		verbose_name = "Déclaration CNIL"
+		verbose_name_plural = "Déclarations CNIL"
+	def __str__(self): return self.user

@@ -60,3 +60,9 @@ class DroitsAdmin(admin.ModelAdmin):
 	list_per_page = 1000
 
 admin.site.register(Droits, DroitsAdmin)
+
+class CnilAdmin(admin.ModelAdmin):
+	model = Cnil
+	list_per_page = 1000
+
+admin.site.register(Cnil, CnilAdmin)

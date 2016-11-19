@@ -29,24 +29,28 @@ def dashboard(request):
 
 @login_required
 def declaration_cnil(request):
+	form_values = {}
 	try : cnil = Cnil.objects.get(user=request.user)
 	except ObjectDoesNotExist :
 		if request.method == "POST":
-			signature = request.POST.get('signature')
-			required_signature = "Lu et approuvé par {} {}".format(request.user.first_name, request.user.last_name)
+			signature = request.POST.get('signature').lower()
+			required_signature = "Lu et approuvé par {} {}".format(request.user.first_name, request.user.last_name).lower()
 			lieu = request.POST.get('lieu')
-			if signature == required_signature and lieu != "" :
-				messages.success(request, "Le formulaire a été bien rempli.")
-			elif signature != required_signature :
-				messages.error(request, 'Votre signature doit mentionner les mots : "{}"'.format(required_signature))
-			elif lieu == "" :
-				messages.error(request, "Vous devez renseigner le lieu de signature.")
+			if signature == required_signature and lieu  :
+				nouvelle_declaration = Cnil(user=request.user, lieu=lieu, signature=signature)
+				nouvelle_declaration.save()
+				messages.success(request, "Votre signature de la déclaration de confidentialité a bien été enregistrée.")
+			elif signature != required_signature or not lieu :
+				if signature != required_signature :
+					messages.error(request, 'Votre signature doit mentionner les mots : "{}"'.format(required_signature))
+				if not lieu :
+					messages.error(request, "Vous devez renseigner le lieu de signature.")
 			else :
-				messages.error(request, "Nous n'avons pas pu enregistrer votre signature.")
-		return render(request, 'fichiers_adherents/cnil.html')
+				messages.error(request, "Désolé, nous n'avons pas réussi à enregistrer votre signature.")
+			form_values = {'lieu': lieu, 'signature': signature}
+		return render(request, 'fichiers_adherents/cnil.html', form_values)
 	else : return redirect('fichier')
 
-# return redirect('declaration_cnil')
 
 @login_required
 def televersement(request):
@@ -174,6 +178,11 @@ class ListeDesAdherents(ListView):
 
 	model = Adherent
 	template_name = 'fichiers_adherents/fichier.html'
+
+	def dispatch(self, request, *args, **kwargs):
+		try : cnil = Cnil.objects.get(user=request.user)
+		except ObjectDoesNotExist : return redirect('fichier__declaration_cnil')
+		else: return super(ListeDesAdherents, self).dispatch(request, *args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
