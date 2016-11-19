@@ -202,3 +202,10 @@ class Droits(models.Model):
 		verbose_name_plural = "droits d'accès".encode('utf-8')
 
 	def __str__(self): return self.name
+
+
+class Cnil(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+	signature = models.CharField(max_length=255)
+	lieu = models.CharField(max_length=255, verbose_name="fait à")
+	date = models.DateTimeField(auto_now=True)

@@ -28,6 +28,27 @@ def dashboard(request):
 
 
 @login_required
+def declaration_cnil(request):
+	try : cnil = Cnil.objects.get(user=request.user)
+	except ObjectDoesNotExist :
+		if request.method == "POST":
+			signature = request.POST.get('signature')
+			required_signature = "Lu et approuvé par {} {}".format(request.user.first_name, request.user.last_name)
+			lieu = request.POST.get('lieu')
+			if signature == required_signature and lieu != "" :
+				messages.success(request, "Le formulaire a été bien rempli.")
+			elif signature != required_signature :
+				messages.error(request, 'Votre signature doit mentionner les mots : "{}"'.format(required_signature))
+			elif lieu == "" :
+				messages.error(request, "Vous devez renseigner le lieu de signature.")
+			else :
+				messages.error(request, "Nous n'avons pas pu enregistrer votre signature.")
+		return render(request, 'fichiers_adherents/cnil.html')
+	else : return redirect('fichier')
+
+# return redirect('declaration_cnil')
+
+@login_required
 def televersement(request):
 	if request.user.has_perm('fichiers_adherents.peut_televerser'):
 		if request.method == "POST":

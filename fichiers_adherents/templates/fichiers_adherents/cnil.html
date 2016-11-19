@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block content %}{{ block.super }}
+
+<h1>Déclaration de confidentialité</h1>
+
+<form action="" method="POST">
+{% csrf_token %}
+<p>Je soussigné(e) {{ user.first_name }} {{ user.last_name }} affirme avoir pris connaissance du <a href="http://www.cnil.fr/fileadmin/documents/La_CNIL/actualite/CNIL_reco_prospection_politique.pdf">guide pratique de la CNIL</a> concernant l'utilisation des fichiers dans le cadre d’activités politiques. Je m’engage à respecter, de façon absolue, les obligations suivantes :</p>
+<ul>
+<li>ne prendre aucune copie des documents et supports d’informations confiés, à l’exception de celles nécessaires pour les besoins de sa fonction de ……………………</li>
+<li>ne pas utiliser les documents et informations traités à des fins autres que celles de la mission précisée ci-dessus</li>
+<li>ne pas divulguer ces documents ou informations à d’autres personnes, qu’il s’agisse de personnes privées ou publiques, physiques ou morales</li>
+<li>prendre toutes les mesures permettant d’éviter une utilisation détournée ou frauduleuse des fichiers</li>
+<li>prendre toutes les mesures, notamment de sécurité matérielle, pour assurer la conservation des documents et informations traités tout au long de sa mission</li>
+<li>détruire, à l'issue de ma mission, tous fichiers manuscrits ou informatisés stockant ces informations</li>
+</ul>
+
+<p>Le fichier des adhérents, fourni dans le cadre de cette mission, reste la propriété des Jeunes Démocrates. A ce titre, également, la sous-traitance est interdite sans l'accord exprès du Président ou du Secrétaire général des Jeunes Démocrates.</p>
+
+<p>Le président des Jeunes Démocrates pourra prononcer la fin immédiate des fonctions de l'intéressé ainsi que la restitution des fichiers en cas de non-respect des dispositions précitées, conformément au règlement intérieur des Jeunes Démocrates.</p>
+
+<p>Le présent document est établi en deux exemplaires originaux, l'un remis à {{ user.first_name }} {{ user.last_name }} et l'autre à Stephen Daloz, Secrétaire général des Jeunes Démocrates.</p>
+
+<p>Fait à <input type="text" name="lieu" placeholder="lieu"/></p>
+
+<p>
+Inscrivez la mention "Lu et approuvé par {{ user.first_name }} {{ user.last_name }}"<br/>
+<input type="text" name="signature"/>
+</p>
+
+<p>
+<button type="submit" class="btn btn-primary">Je signe la charte</button>
+</p>
+</form>
+
+
+{% endblock content %}
