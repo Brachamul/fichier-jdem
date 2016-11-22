@@ -189,6 +189,7 @@ class ListeDesAdherents(ListView):
 		context = super(ListeDesAdherents, self).get_context_data(**kwargs)
 		context['adherents'] = adherents_visibles(self.request)
 		context['page_title'] = 'Fichier des adhérents'
+		context['csv'] = fichier_csv(self.request)
 		context['list_actions'] = [
 			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
 			{'text': 'Administrer', 'url': reverse('admin:fichiers_adherents_adherent_changelist')},
@@ -227,3 +228,20 @@ def VueAdherent(request, num_adherent):
 	else :
 		messages.error(request, "Vous n'êtes pas autorisé à consulter ce profil.")
 		return redirect('fichier')
+
+
+
+def fichier_csv(request):
+	csvContent = "data:text/csv;charset=utf-8,\uFEFF"
+	csvContent += "num_adherent; prenom; nom; federation; date_premiere_adhesion; date_derniere_cotisation; genre; adresse1; adresse2; adresse3; adresse4; code_postal; ville; pays; npai; date_de_naissance; profession; tel_portable; tel_bureau; tel_domicile; email; mandats; commune; canton;\n"
+	for adherent in adherents_visibles(request):
+		data = [
+			str(adherent.num_adherent), adherent.prenom, adherent.nom,
+			str(adherent.federation), str(adherent.date_premiere_adhesion), str(adherent.date_derniere_cotisation),
+			adherent.genre, adherent.adresse1, adherent.adresse2, adherent.adresse3, adherent.adresse4,
+			adherent.code_postal, adherent.ville, adherent.pays, adherent.npai, str(adherent.date_de_naissance),
+			adherent.profession, adherent.tel_portable, adherent.tel_bureau, adherent.tel_domicile,
+			adherent.email, adherent.mandats, adherent.commune, adherent.canton
+			]
+		csvContent += ";".join(data) + "\n"
+	return csvContent

@@ -26,7 +26,7 @@
 
 
 
-{% if user.droits_set.all %}
+{% if user.accesfichier.droits_set.all %}
 	<p>Vous avez les droits de consultation pour :
 		{% for droits in user.accesfichier.droits_set.all %}<span class="tag tag-default">{{ droits }}</span> {% endfor %}
 	</p>
@@ -120,37 +120,7 @@ a[href^='tel'] { display: block; }
 <!-- CSV Downloader-->
 <script>
 
-// CSV generator function
-function csvify(data) {
-	var csvContent = "data:text/csv;charset=utf-8,\uFEFF"
-	data.forEach(function(infoArray, index){
-		dataString = infoArray.join(";")
-		csvContent += index < data.length ? dataString+ "\n" : dataString;
-	});
-	csvContent = csvContent.replace("&#39;", "'") // for some reason, apostrophes are stored as "&#39;", which breaks the download link
-	return encodeURI(csvContent)
-}
-	
-window.csvData = [[
-	"num_adherent", "prenom", "nom", "federation",
-	"date_premiere_adhesion", "date_derniere_cotisation", "genre",
-	"adresse1", "adresse2", "adresse3", "adresse4",
-	"code_postal", "ville", "pays", "npai",
-	"date_de_naissance", "profession",
-	"tel_portable", "tel_bureau", "tel_domicile", "email",
-	"mandats", "commune", "canton"
-], {% for adherent in adherents %} [
-	"{{ adherent.num_adherent }}", "{{ adherent.prenom }}", "{{ adherent.nom }}", "{{ adherent.federation }}",
-	"{{ adherent.date_premiere_adhesion }}", "{{ adherent.date_derniere_cotisation }}", "{{ adherent.genre }}",
-	"{{ adherent.adresse1 }}", "{{ adherent.adresse2 }}", "{{ adherent.adresse3 }}", "{{ adherent.adresse4 }}",
-	"{{ adherent.code_postal }}", "{{ adherent.ville }}", "{{ adherent.pays }}", "{{ adherent.npai }}",
-	"{{ adherent.date_de_naissance }}", "{{ adherent.profession }}",
-	"{{ adherent.tel_portable }}", "{{ adherent.tel_bureau }}", "{{ adherent.tel_domicile }}", "{{ adherent.email }}",
-	"{{ adherent.mandats }}", "{{ adherent.commune }}", "{{ adherent.canton }}"
-]{% if not forloop.last %},{% endif %}
-{% endfor %}]
-
-document.getElementById("download-csv").setAttribute("href", csvify(csvData))
+document.getElementById("download-csv").setAttribute("href", encodeURI(`{{ csv }}`.replace('\n', ' ')))
 
 </script>
 
