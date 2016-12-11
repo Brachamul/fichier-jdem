@@ -127,7 +127,7 @@ STATICFILES_DIRS = (
 	os.path.join((PROJECT_ROOT), "static", "static"),
 )
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/auth/'
 LOGIN_REDIRECT_URL = '/'
 
 from django.contrib import messages
