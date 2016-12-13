@@ -12,3 +12,6 @@ from django.contrib.auth.models import User
 class NetworkUser(models.Model):
 	user = models.ForeignKey(User)
 	uuid = models.UUIDField(primary_key=True, max_length=32, default=uuid.uuid4, editable=False)
+
+	def __str__(self):
+		return str(self.user)

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}{{ block.super }}
+
+<div class="col-sm-12">
+<div style="max-width: 480px; margin: auto;">
+
+	<p>Process complete.</p>
+	<p>Currently logged in ? [{% if user.is_authenticated %}YES{% else %}NO{% endif %}]
+	<p>Username : {{ username }}</p>
+	<p>Token used : {{ token }}</p>
+
+</div>
+</div>
+
+{% endblock content %}
+
+
+
+{% block scripts %}{{ block.super }}
+
+{% endblock scripts %}
+
