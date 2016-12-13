@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, Http404, QueryDict
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, DetailView, ListView, FormView, CreateView
 
 from .models import *
@@ -20,28 +21,14 @@ def Identify(request):
 	''' Let's go to the provider and log into it to ask for authorization '''
 	return redirect(settings.NETWORK_AUTH_URL + 'o/identify/' + settings.NETWORK_AUTH_KEY)
 
+@csrf_exempt # TODO : make sure this isn't stupid
 def SetToken(request, user_uuid, token, app_secret):
 	# secretly sets a new authentication token as the user's password
 	if app_secret != settings.NETWORK_AUTH_SECRET : raise WrongSecret
-	print()
-	print('==================================================')
-	print('Setting token !')
-	print('==================================================')
-	print()
 	try :
 		network_user = NetworkUser.objects.get(uuid=uuid.UUID(user_uuid))
 	except NetworkUser.DoesNotExist: 
-		print()
-		print('==================================================')
-		print('NetworkUser with uuid {} does not exist !'.format(user_uuid))
-		print('==================================================')
-		print()
 		user_details = requests.get(settings.NETWORK_AUTH_URL + 'o/get-details/' + settings.NETWORK_AUTH_KEY + '/' + settings.NETWORK_AUTH_SECRET + '/' + user_uuid)
-		print()
-		print('==================================================')
-		print('Using details ' + user_details)
-		print('==================================================')
-		print()
 		user = User.objects.create_user(user_details)
 		network_user = NetworkUser(user=user, uuid=uuid.UUID(user_uuid))
 		network_user.save()
@@ -56,8 +43,8 @@ def SetToken(request, user_uuid, token, app_secret):
 
 def CallBack(request, user_uuid, token):
 	# token is checked against new password to see if it matches
-	get_object_or_404(NetworkUser, uuid=user_uuid)
-	user = authenticate(username=NetworkUser.user.username, password=token)
+	network_user = get_object_or_404(NetworkUser, uuid=user_uuid)
+	user = authenticate(username=network_user.user.username, password=token)
 	redirect_to = request.POST.get('next')
 	if user is not None:
 		if user.is_active:
@@ -66,4 +53,4 @@ def CallBack(request, user_uuid, token):
 			return redirect(next)
 		else: messages.error(request, 'account disabled')
 	else: messages.error(request, 'invalid login')
-	return redirect(redirect_to) # TODO : this should go to some sort of error page
+	return redirect('/') # TODO : this should go to some sort of error page

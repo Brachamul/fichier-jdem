@@ -18,7 +18,7 @@ SECRET_KEY = 'wb8ua=u$k3cpv*b&#63-@9d!0h)mgozggi8-(%xvxg4i1a-5&x'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+APPEND_SLASH = True
 
 # Application definition
 
@@ -127,7 +127,7 @@ STATICFILES_DIRS = (
 	os.path.join((PROJECT_ROOT), "static", "static"),
 )
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/auth/'
 LOGIN_REDIRECT_URL = '/'
 
 from django.contrib import messages
