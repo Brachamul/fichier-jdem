@@ -15,10 +15,6 @@ from django.views.generic import TemplateView, DetailView, ListView, FormView, C
 
 from .models import *
 
-def say(something):
-	print('.....................')
-	print(something)
-
 class WrongSecret(Exception): pass
 
 def Identify(request):
@@ -28,39 +24,30 @@ def Identify(request):
 @csrf_exempt # TODO : make sure this isn't stupid
 def SetToken(request, user_uuid, token, app_secret):
 	# secretly sets a new authentication token as the user's password
-	say('Setting token to ' + token)
 	if app_secret != settings.NETWORK_AUTH_SECRET : raise WrongSecret
 	try :
 		# Check if this already registered on this site
 		network_user = NetworkUser.objects.get(uuid=uuid.UUID(user_uuid))
 	except NetworkUser.DoesNotExist: 
 		# Otherwise, create it
-		say('network user does not exist, proceeding to network user creation')
 		user_details_request = requests.get(settings.NETWORK_AUTH_URL + 'o/get-details/' + settings.NETWORK_AUTH_KEY + '/' + settings.NETWORK_AUTH_SECRET + '/' + user_uuid)
 		user_details = json.loads(user_details_request.text) # The user_details_request returns a Response object. Its '.text' is JSON.
-		print(user_details)
 		user = User.objects.create_user(**user_details)
 		network_user = NetworkUser(user=user, uuid=uuid.UUID(user_uuid))
 		network_user.save()
 	else :
 		# Network user already exists
-		say('network user already exists')
 		user = network_user.user
 	user.set_password(token)
 	user.save()
-	print('Setting password to : ' + token)
 	return HttpResponse('Token succesfully set')
 
 
 
 def CallBack(request, user_uuid, token):
 	# token is checked against new password to see if it matches
-	say('Attempting to log with token ' + token)
 	network_user = get_object_or_404(NetworkUser, uuid=user_uuid)
-	print('Network user : ' + str(network_user))
-	print('User : ' + str(network_user.user))
 	user = authenticate(username=network_user.user.username, password=token)
-	say('User : ' + str(user))
 	url_to_redirect = request.POST.get('next')
 	if not url_to_redirect : url_to_redirect = '/'
 	if user is not None:
