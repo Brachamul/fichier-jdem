@@ -18,7 +18,7 @@ SECRET_KEY = 'wb8ua=u$k3cpv*b&#63-@9d!0h)mgozggi8-(%xvxg4i1a-5&x'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+APPEND_SLASH = True
 
 # Application definition
 
@@ -47,7 +47,7 @@ MIDDLEWARE_CLASSES = [
 	'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	'_project.middleware.LoginRequiredMiddleware',
+#	'_project.middleware.LoginRequiredMiddleware', # TODO : reactivate
 ]
 
 
@@ -127,11 +127,21 @@ STATICFILES_DIRS = (
 	os.path.join((PROJECT_ROOT), "static", "static"),
 )
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/auth/'
 LOGIN_REDIRECT_URL = '/'
 
 from django.contrib import messages
 MESSAGE_TAGS = { messages.ERROR: 'danger' }
+
+
+
+# CENTRIFUGE NETWORK AUTH
+INSTALLED_APPS += ['network_auth_client',]
+NETWORK_AUTH_URL = 'http://auth.centrifuge.link/'
+NETWORK_AUTH_KEY = '28eeac9c-5d7e-4f63-ac7b-8afe713999cf'
+NETWORK_AUTH_SECRET = 'TIS A SECRET DUMMY' # re-set in local settings
+
+#TODO : add some logging
 
 
 ##########################
