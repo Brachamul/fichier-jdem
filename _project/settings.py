@@ -136,10 +136,12 @@ MESSAGE_TAGS = { messages.ERROR: 'danger' }
 
 
 # CENTRIFUGE NETWORK AUTH
+
 INSTALLED_APPS += ['network_auth_client',]
-NETWORK_AUTH_URL = 'http://auth.centrifuge.link/'
-NETWORK_AUTH_KEY = '28eeac9c-5d7e-4f63-ac7b-8afe713999cf'
-NETWORK_AUTH_SECRET = 'TIS A SECRET DUMMY' # re-set in local settings
+''' The following values must be set in local settings '''
+NETWORK_AUTH_URL	= 'PLEASE SET NETWORK_AUTH_URL' # e.g. : 'http://localhost:8007/'
+NETWORK_AUTH_KEY	= 'PLEASE SET NETWORK_AUTH_KEY' # UUID
+NETWORK_AUTH_SECRET	= 'PLEASE SET NETWORK_AUTH_SECRET' # UUID
 
 #TODO : add some logging
 
