@@ -19,7 +19,7 @@ class WrongSecret(Exception): pass
 
 def Identify(request):
 	''' Let's go to the provider and log into it to ask for authorization '''
-	return redirect(settings.NETWORK_AUTH_URL + 'o/identify/' + settings.NETWORK_AUTH_KEY)
+	return redirect(settings.NETWORK_AUTH_URL + 'identify/' + settings.NETWORK_AUTH_KEY)
 
 @csrf_exempt # TODO : make sure this isn't stupid
 def SetToken(request, user_uuid, token, app_secret):
@@ -30,7 +30,7 @@ def SetToken(request, user_uuid, token, app_secret):
 		network_user = NetworkUser.objects.get(uuid=uuid.UUID(user_uuid))
 	except NetworkUser.DoesNotExist: 
 		# Otherwise, create it
-		user_details_request = requests.get(settings.NETWORK_AUTH_URL + 'o/get-details/' + settings.NETWORK_AUTH_KEY + '/' + settings.NETWORK_AUTH_SECRET + '/' + user_uuid)
+		user_details_request = requests.get(settings.NETWORK_AUTH_URL + 'get-details/' + settings.NETWORK_AUTH_KEY + '/' + settings.NETWORK_AUTH_SECRET + '/' + user_uuid)
 		user_details = json.loads(user_details_request.text) # The user_details_request returns a Response object. Its '.text' is JSON.
 		user = User.objects.create_user(**user_details)
 		network_user = NetworkUser(user=user, uuid=uuid.UUID(user_uuid))
