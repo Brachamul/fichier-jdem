@@ -199,7 +199,7 @@ class ListeDesAdherents(ListView):
 
 def adherents_visibles(request):
 	# Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir
-	try : droits = request.user.accesfichier.droits_set.all()
+	try : droits = request.user.droits_set.all()
 	except ObjectDoesNotExist :
 		messages.error(request, "Vous n'avez pas de droits d'accès au fichier.")
 		return []

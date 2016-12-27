@@ -190,17 +190,14 @@ class WrongNumber(models.Model):
 	def __str__(self): return self.adherent
 
 
-class AccesFichier(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-	date = models.DateTimeField(auto_now=True)
-	class Meta :
-		verbose_name = "Lecteur"
-		verbose_name_plural = "Lecteurs"
-	def __str__(self): return str(self.user)
 
 class Droits(models.Model):
+
+	''' Un groupe de membres définis par une requête, auquel on peut attacher
+	des lecteurs qui auront droit d'accès pour lire ces membres dans leur fichier '''
+
 	name = models.CharField(max_length=250)
-	readers = models.ManyToManyField(AccesFichier, blank=True)
+	readers = models.ManyToManyField(User, through='Lecteur')
 	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
 
 	class Meta:
@@ -208,6 +205,13 @@ class Droits(models.Model):
 		verbose_name_plural = "droits d'accès".encode('utf-8')
 
 	def __str__(self): return self.name
+
+
+class Lecteur(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	droits = models.ForeignKey(Droits, on_delete=models.CASCADE)
+	date = models.DateTimeField(auto_now=True)
+	def __str__(self): return str(self.user)
 
 
 class Cnil(models.Model):
