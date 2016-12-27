@@ -10,8 +10,10 @@ from django.contrib.auth.models import User
 # http://stackoverflow.com/questions/35528074/django-is-extending-abstractbaseuser-required-to-use-email-as-username-field
 
 class NetworkUser(models.Model):
-	user = models.ForeignKey(User)
+	user = models.OneToOneField(User, null=True, related_name='network_user')
 	uuid = models.UUIDField(primary_key=True, max_length=32, default=uuid.uuid4, editable=False)
+
+	# TODO : handle cascading when a user is deleted on Centrifuge
 
 	def __str__(self):
 		return str(self.user)
@@ -34,5 +36,14 @@ class NetworkUser(models.Model):
 
 		# The user_details_request returns a Response object. Its '.text' is JSON.
 		user_details = json.loads(request_user_details.text)
+
+		# If this is the first time the user is authenticating to this client app
+		# We'll need to create an account for them
+		if not self.user :
+			# If this user did
+			self.user = User.objects.create_user(user_details['username'])
+			self.save()
+
+		# Now, update the user's account with details from the auth_network
 		User.objects.filter(pk=self.user.pk).update(**user_details)
 		self.user.save()
