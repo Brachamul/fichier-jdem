@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}{{ block.super }}
+
+<div class="col-sm-12">
+
+<div>
+{% for item in items %}
+	{{ item }}<br/>
+{% endfor %}
+</div>
+
+{% endblock content %}

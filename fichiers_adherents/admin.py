@@ -23,16 +23,6 @@ class AdherentAdmin(admin.ModelAdmin):
 admin.site.register(Adherent, AdherentAdmin)
 
 
-class DroitsInline(admin.TabularInline):
-	model = Droits.readers.through
-
-class AccesFichierAdmin(admin.ModelAdmin):
-	model = AccesFichier
-	inlines = [DroitsInline, ]
-	list_per_page = 1000
-
-admin.site.register(AccesFichier, AccesFichierAdmin)
-
 
 class NoteAdmin(admin.ModelAdmin):
 	model = Note
@@ -43,11 +33,18 @@ admin.site.register(Note, NoteAdmin)
 
 
 
+class LecteursInline(admin.TabularInline):
+	model = Lecteur
+	extra = 1
+
 class DroitsAdmin(admin.ModelAdmin):
 	model = Droits
+	inlines = [LecteursInline, ]
 	list_per_page = 1000
 
 admin.site.register(Droits, DroitsAdmin)
+
+
 
 class CnilAdmin(admin.ModelAdmin):
 	model = Cnil
