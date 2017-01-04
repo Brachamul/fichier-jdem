@@ -1,7 +1,7 @@
-# CENTRIFUGE NETWORK AUTH
-NETWORK_AUTH_URL = 'http://localhost:8007/'
-NETWORK_AUTH_KEY = '686183c4-370f-44dd-85ce-b42ab2fe3c76'
-NETWORK_AUTH_SECRET = '7b1f56d6-ed7e-4338-bcf6-f3bcdf2238cb'
+# AUTH NETWORK SETTINGS
+AUTH_NETWORK_URL = 'http://localhost:8007/'
+AUTH_NETWORK_KEY = '686183c4-370f-44dd-85ce-b42ab2fe3c76'
+AUTH_NETWORK_SECRET = '7b1f56d6-ed7e-4338-bcf6-f3bcdf2238cb'
 
 # STANDARD SETTINGS
 SITE_URL = 'localhost' # use http:// in production
@@ -32,3 +32,7 @@ LOGGING = {
 		},
 	},
 }
+
+#	CSRF_COOKIE_SECURE = False
+#	SESSION_COOKIE_SECURE = False
+#	CSRF_COOKIE_HTTPONLY = False

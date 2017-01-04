@@ -137,14 +137,8 @@ MESSAGE_TAGS = { messages.ERROR: 'danger' }
 
 
 # CENTRIFUGE NETWORK AUTH
+INSTALLED_APPS += ['django-auth-network-client',] # and more in local_settings.py
 
-INSTALLED_APPS += ['network_auth_client',]
-''' The following values must be set in local settings '''
-NETWORK_AUTH_URL	= 'PLEASE SET NETWORK_AUTH_URL' # e.g. : 'http://localhost:8007/'
-NETWORK_AUTH_KEY	= 'PLEASE SET NETWORK_AUTH_KEY' # UUID
-NETWORK_AUTH_SECRET	= 'PLEASE SET NETWORK_AUTH_SECRET' # UUID
-
-#TODO : add some logging
 
 
 ##########################

@@ -18,29 +18,43 @@ from .models import *
 
 class WrongSecret(Exception): pass
 
+
+
 def Identify(request):
 	''' Let's go to the provider and log into it to ask for authorization '''
-	return redirect(settings.NETWORK_AUTH_URL + 'identify/' + settings.NETWORK_AUTH_KEY)
+	return redirect(settings.AUTH_NETWORK_URL + 'identify/' + settings.AUTH_NETWORK_KEY)
+
+
 
 @csrf_exempt # TODO : make sure this isn't stupid
 def SetToken(request, user_uuid, token, app_secret):
+
+	''' This view should be called by the DAN provider, using the app_secret.
+	It sets a new authentication token as the user's password. '''
+
 	print('==========')
 	print(request.path)
-	# secretly sets a new authentication token as the user's password
-	if app_secret != settings.NETWORK_AUTH_SECRET : raise WrongSecret
-	print('==========')
-	print('user_uuid : ' + user_uuid)
+
+	if app_secret != settings.AUTH_NETWORK_SECRET : raise WrongSecret
 	network_user, created = NetworkUser.objects.get_or_create(uuid=uuid.UUID(user_uuid))
 	network_user.update_user_details()
 	network_user.user.set_password(token)
 	network_user.user.save()
 	return HttpResponse('Token succesfully set to ' + token)
 
+
+
 def CallBack(request, user_uuid, token):
-	# token is checked against new password to see if it matches
-	print('==========')
-	print(request.path)
+
+	''' This view is called by the user's browser when attempting to authenticate.
+	It uses the new token as password. If the token matches the previously set
+	password, the user is allowed to authenticate.'''
+	
 	network_user = get_object_or_404(NetworkUser, uuid=user_uuid)
+	print('==========')
+	print(network_user)
+	print('==========')
+	print(network_user.user)
 	user = authenticate(username=network_user.user.username, password=token)
 	url_to_redirect = request.POST.get('next')
 	if not url_to_redirect : url_to_redirect = '/'
