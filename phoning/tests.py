@@ -29,7 +29,8 @@ class CoordoneesTestCase(TestCase):
 			date_premiere_adhesion=datetime.datetime(2014,3,12),
 			date_derniere_cotisation=datetime.datetime(2016,5,16),
 			date_de_naissance=datetime.datetime(1991,5,4),
-			tel_portable="06 72 82 17 28"
+			tel_portable="06 72 82 17 28",
+			actuel=True,
 			)
 
 		Adherent.objects.create(
@@ -38,7 +39,8 @@ class CoordoneesTestCase(TestCase):
 			date_premiere_adhesion=datetime.datetime(2015,6,13),
 			date_derniere_cotisation=datetime.datetime(2016,8,31),
 			date_de_naissance=datetime.datetime(1993,3,30),
-			tel_portable="06 72 82 17 27"
+			tel_portable="06 72 82 17 27",
+			actuel=True,
 			)
 
 
