@@ -158,12 +158,6 @@ def homme_ou_femme(title):
 	elif title == "M." : return "H"
 	else : return "?"
 
-def adherents_actifs() :
-	''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
-	return Adherent.objects.annotate(max_date=Max('date_derniere_cotisation')).filter(date_derniere_cotisation=F('max_date'))
-	# can't use Adherent.objects.all().order_by('date_derniere_cotisation').distinct('num_adherent') on sqlite, so using .values_list('num_adherent', flat=True).distinct() instead
-
-
 def actualiser_les_adherents(request) :
 	if request.user.has_perm('fichiers_adherents.peut_televerser'):
 		actualisation_des_adherents()

@@ -141,7 +141,6 @@ class Adherent(models.Model):
 		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
 
 
-
 	# Meta
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
@@ -152,6 +151,7 @@ class Adherent(models.Model):
 		permissions = (('lecture_fichier_national', 'peut lire le fichier national'),)
 		verbose_name = "adhérent".encode('utf-8')
 		verbose_name_plural = 'adhérents'.encode('utf-8')
+
 
 
 def actualisation_des_adherents() :

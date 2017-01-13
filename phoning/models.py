@@ -9,7 +9,7 @@ from fichiers_adherents.models import Adherent
 
 class Operation(models.Model):
 	name = models.CharField(max_length=255)
-	query = models.CharField(max_length=5000)
+	query = models.CharField(max_length=5000, help_text="eg: { 'federation': 64, }")
 	authorized_users = models.ManyToManyField(User, related_name='allowed_operations', blank=True)
 	max_requests = models.SmallIntegerField(default=10) # per 20 minutes
 	targets_called_successfully = models.ManyToManyField(Adherent, related_name='operations_where_called', blank=True)

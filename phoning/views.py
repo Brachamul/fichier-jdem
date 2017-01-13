@@ -108,7 +108,10 @@ def coordonnees(request, operation_id):
 				query = ast.literal_eval(operation.query) # admin-written query transformed into useable filter
 				adherents_called_successfully = operation.targets_called_successfully.all()
 				adherents_with_wrong_number = operation.targets_with_wrong_number.all()
-				operation_targets = Adherent.objects.filter(**query).exclude(pk__in=adherents_called_successfully).exclude(pk__in=adherents_with_wrong_number)
+				operation_targets = Adherent.objects.filter(**query)\
+					.exclude(actuel=False)\
+					.exclude(pk__in=adherents_called_successfully)\
+					.exclude(pk__in=adherents_with_wrong_number)
 				if operation_targets.count() < 1 : 
 					messages.success(request, "Tous les adhérents de cette opération ont déjà été contactés !")
 					return redirect('phoning')
