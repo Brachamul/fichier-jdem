@@ -30,3 +30,16 @@
 
 
 {% endblock content %}
+
+
+
+{% block scripts %}{{ block.super}}
+
+<script>
+$('#id_fichier_csv').change(function(){
+	var possible_date = $(this).val().slice(0, 10)
+	$('#id_date').val(possible_date)
+})
+</script>
+
+{% endblock %}
