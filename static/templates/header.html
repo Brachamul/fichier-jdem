@@ -30,7 +30,6 @@
 					<a class="dropdown-item" href="{% url 'fichier__adherents' %}">Liste des adhérents</a>
 					<a class="dropdown-item" href="{% url 'televersement_du_fichier_adhérent' %}">Téléverser un fichier</a>
 					<a class="dropdown-item" href="{% url 'fichier__query_checker' %}">Testeur de requêtes</a>
-					<a class="dropdown-item" href="{% url 'fichier__actualiser' %}">Actualiser</a>
 				</div>
 			</li>
 			{% elif user.droits_set.all %}

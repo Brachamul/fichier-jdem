@@ -13,13 +13,12 @@ class AdherentAdmin(admin.ModelAdmin):
 	model = Adherent
 	inlines = [NotesInline, ]
 	list_per_page = 1000
-	list_display = ("num_adherent", "actuel", "nom", "prenom", "federation", "email", "fichier")
+	list_display = ("num_adherent", "nom", "prenom", "federation", "email", "a_jour_de_cotisation", "fichier")
 	readonly_fields = (
-		"actuel", "num_adherent", "genre", "nom", "prenom", "federation", "date_premiere_adhesion", "date_derniere_cotisation",
-		"adresse1", "adresse2", "adresse3", "adresse4", "code_postal", "ville", "pays", "npai", "date_de_naissance",
+		"num_adherent", "genre", "nom", "prenom", "federation", "date_premiere_adhesion", "date_derniere_cotisation",
+		"a_jour_de_cotisation", "adresse1", "adresse2", "adresse3", "adresse4", "code_postal", "ville", "pays", "npai", "date_de_naissance",
 		"profession", "tel_portable", "tel_bureau", "tel_domicile", "email", "mandats", "commune", "canton",
 		"fichier")
-	# TODO : derniere date de cotis !
 admin.site.register(Adherent, AdherentAdmin)
 
 

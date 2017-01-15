@@ -5,10 +5,14 @@ import os, uuid
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Max, F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-from datetime import datetime, timedelta
+import datetime as dt
+
+
 
 
 class FichierAdherents(models.Model):
@@ -16,7 +20,7 @@ class FichierAdherents(models.Model):
 	date_d_import = models.DateTimeField(auto_now_add=True)
 	date = models.DateField()
 	importateur = models.ForeignKey(User)
-	fichier_csv = models.FileField(upload_to='fichiers_adherents/')
+	fichier_csv = models.FileField(upload_to='fichiers_adherents/', null=True)
 
 	def delete(self,*args,**kwargs):
 		# TODO : Doesn't seem to work :(
@@ -25,14 +29,14 @@ class FichierAdherents(models.Model):
 
 		super(FichierAdherents, self).delete(*args,**kwargs)
 
-	def adherents(self) :
+	def adherents_a_jour(self) :
 		''' liste les adherents ayant été importés par ce fichier '''
-		return Adherent.objects.filter(fichier=self)
+		return self.adherent_set.filter(a_jour_de_cotisation=True)
 
 	def nouveaux_adherents(self) :
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 		nouveaux_adherents = []
-		for adherent in self.adherents():
+		for adherent in self.adherents_a_jour():
 			if adherent.is_new(fichier=self) :
 				nouveaux_adherents.append(adherent)
 		return nouveaux_adherents
@@ -40,23 +44,23 @@ class FichierAdherents(models.Model):
 	def resubbed(self) :
 		''' liste le nombre d'adhérents qui ont réadhéré '''
 		adherents_maj = []
-		for adherent in self.adherents():
+		for adherent in self.adherent_set.all():
 			if adherent.has_resubbed(fichier=self) :
 				adherents_maj.append(adherent)
 		return adherents_maj
 
 	def expired(self):
-		expiration_window_end = self.date_de_ce_fichier() - timedelta(days=730) # 2 years
-		expiration_window_start = expiration_window_end - timedelta(days=self.jours_depuis_le_fichier_precedent())
-		expired_people = Adherent.objects.filter(
+		expiration_window_end = self.date - dt.timedelta(days=730.50) # 2 years
+		expiration_window_start = expiration_window_end - dt.timedelta(days=self.jours_depuis_le_fichier_precedent())
+		return self.adherent_set.filter(
+			a_jour_de_cotisation=False,
 			date_derniere_cotisation__lt = expiration_window_end,
 			date_derniere_cotisation__gt = expiration_window_start
 			)
-		return expired_people
 
 	def date_de_ce_fichier(self) :
 		''' cherche la dernière date mentionnée dans le fichier '''
-		latest_entry = self.adherents().latest()
+		latest_entry = self.adherent_set.latest()
 		return latest_entry.date_derniere_cotisation
 
 	def jours_depuis_le_fichier_precedent(self) :
@@ -70,7 +74,8 @@ class FichierAdherents(models.Model):
 		return "Fichier du {}, importé le {} par {}".format(self.date, self.date_d_import.date(), self.importateur)
 
 	class Meta:
-		get_latest_by = "date_derniere_cotisation"
+		ordering = ['-date']
+		get_latest_by = 'date'
 		verbose_name = 'fichier'
 		verbose_name_plural = 'fichiers'
 		permissions = (('peut_televerser', 'peut charger les nouveaux fichiers adhérents'),)
@@ -111,20 +116,16 @@ class Adherent(models.Model):
 	mandats = models.CharField(max_length=255, null=True, blank=True)
 	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élue dans une autre commune que sa ville de résidence.
 	canton = models.CharField(max_length=255, null=True, blank=True)
-	actuel = models.BooleanField(default=False) # valeur calculée, voir actualisation_des_adherents()
-
+	a_jour_de_cotisation = models.BooleanField(default=False)
 
 
 	# Utilitaires
 	
 	def anciennete(self):
-		return datetime.now() - self.date_premiere_adhesion
+		return dt.datetime.now() - self.date_premiere_adhesion
 	
-	def actif(self):
-		return (datetime.now().year - self.date_derniere_cotisation.year) > settings.DUREE_D_ACTIVITE
-
 	def jours_depuis_la_derniere_cotisation(self):
-		return (datetime.now().date() - self.date_derniere_cotisation).days
+		return (dt.datetime.now().date() - self.date_derniere_cotisation).days
 
 	def nom_courant(self):
 		try : return self.prenom + " " + self.nom
@@ -140,7 +141,6 @@ class Adherent(models.Model):
 		except Adherent.DoesNotExist : return False
 		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
 
-
 	# Meta
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
@@ -152,19 +152,23 @@ class Adherent(models.Model):
 		verbose_name = "adhérent".encode('utf-8')
 		verbose_name_plural = 'adhérents'.encode('utf-8')
 
-
-
-def actualisation_des_adherents() :
-	'''
-	Les adhérents ont chacun plusieurs lignes dans la base, puisque leurs données
-	sont copiées à chaque import du fichier. Cette fonction sélectionne, pour chaque adhérent,
-	une seule ligne considéré comme la plus à jour, et la marque d'un "actuel=True"
-	'''
-	Adherent.objects.all().update(actuel=False) # Reset
-	for adherent in Adherent.objects.values('num_adherent').annotate(date_du_ficher=Max('fichier__date')) :
-		adherent = Adherent.objects.get(num_adherent=adherent['num_adherent'], fichier__date=adherent['date_du_ficher'])
-		adherent.actuel = True
+@transaction.atomic
+def verifier_si_les_adherents_sont_a_jour(fichier):
+	for adherent in fichier.adherent_set.all() :
+		derniere_cotisation = adherent.date_derniere_cotisation
+		if isinstance(derniere_cotisation, dt.datetime) : # for some reason the datefield sometimes contains datetime values
+			derniere_cotisation = derniere_cotisation.date()
+		adherent.a_jour_de_cotisation = derniere_cotisation > fichier.date - dt.timedelta(days=730.5) # 2 ans
 		adherent.save()
+
+
+
+def adherents_actuels() :
+	fichier_le_plus_recent = FichierAdherents.objects.latest()
+	return Adherent.objects.filter(
+		fichier=fichier_le_plus_recent,
+		a_jour_de_cotisation=True,
+		)
 
 
 
@@ -193,7 +197,7 @@ class WrongNumber(models.Model):
 
 class Droits(models.Model):
 
-	''' Un groupe de membres définis par une requête, auquel on peut attacher
+	''' Un groupe d'adhérents définis par une requête, auquel on peut attacher
 	des lecteurs qui auront droit d'accès pour lire ces membres dans leur fichier '''
 
 	name = models.CharField(max_length=250)
@@ -201,6 +205,7 @@ class Droits(models.Model):
 	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
 
 	class Meta:
+		ordering = ['name']
 		verbose_name = "droit d'accès".encode('utf-8')
 		verbose_name_plural = "droits d'accès".encode('utf-8')
 

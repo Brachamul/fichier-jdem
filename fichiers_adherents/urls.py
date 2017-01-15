@@ -9,7 +9,7 @@ urlpatterns = [
 	url(r'^query-checker/$', views.query_checker, name='fichier__query_checker'),
 	url(r'^adherents/$', views.ListeDesAdherents.as_view(), name='fichier__adherents'),
 	url(r'^adherents/(?P<num_adherent>[0-9]+)/$', views.VueAdherent, name='adherent'),
-	url(r'^adherents/actualiser/$', views.actualiser_les_adherents, name='fichier__actualiser'),
 	url(r'^declaration-cnil/$', views.declaration_cnil, name='fichier__declaration_cnil'),
+	url(r'^droits/$', views.DroitsDeLecture.as_view(), name='fichier__droits'),
 	url(r'^$', RedirectView.as_view(permanent=False, url='adherents/'), name='fichier'),
 ]
