@@ -197,7 +197,7 @@ class Droits(models.Model):
 	des lecteurs qui auront droit d'accès pour lire ces membres dans leur fichier '''
 
 	name = models.CharField(max_length=250)
-	readers = models.ManyToManyField(User, through='Lecteur')
+	readers = models.ManyToManyField(User, through='Reader')
 	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
 
 	class Meta:
@@ -207,11 +207,13 @@ class Droits(models.Model):
 	def __str__(self): return self.name
 
 
-class Lecteur(models.Model):
+class Reader(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	droits = models.ForeignKey(Droits, on_delete=models.CASCADE)
 	date = models.DateTimeField(auto_now=True)
-	def __str__(self): return str(self.user)
+	class Meta :
+		verbose_name = "Lecteur"
+		def __str__(self): return str(self.user)
 
 
 class Cnil(models.Model):
