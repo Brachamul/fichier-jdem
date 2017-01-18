@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 import csv, logging, sys, random, ast, json
 
+import datetime as dt
+
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Max, F
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
@@ -15,10 +19,12 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 
 
+
 #	from datascope.models import mettre_a_jour_les_federations
 
 from .models import *
 from .forms import *
+from . import emails
 
 '''
 @login_required
@@ -64,10 +70,12 @@ def televersement(request):
 				importateur = request.user
 				date = request.POST.get('date')
 				fichier.name = ('fichiers_adherents/' + date + '_' + request.user.username + '.csv') # renomme le fichier
+				date = dt.datetime.strptime(date, '%Y-%m-%d').date() # converts date from 'XXXX-XX-XX' format to datetime.date
 				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
 				nouveau_fichier.save()
 				importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
-				actualisation_des_adherents()
+				verifier_si_les_adherents_sont_a_jour(nouveau_fichier)
+				emails.prevenir_du_chargement_dun_nouveau_fichier()
 				return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
 			else:
 				return render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
@@ -114,8 +122,11 @@ def query_checker(request):
 
 ''' HELPER FUNCTIONS '''
 
+@transaction.atomic # permet de charger tous les adherents en une seule fois, à la fin du traitement du fichier
 def importation(fichier):
+
 	# Lis le fichier CSV importé et crée une instance Adherent pour chacun d'entre eux
+
 	current_row = 0
 	with open(settings.MEDIA_ROOT + '/' + fichier.fichier_csv.name, encoding="cp1252", newline='') as fichier_ouvert:
 		lecteur = csv.DictReader(fichier_ouvert, delimiter=";")
@@ -150,28 +161,13 @@ def importation(fichier):
 				)
 
 def process_csv_date(csv_date):
-	if csv_date : return datetime.strptime(csv_date, '%d/%m/%Y').date()
+	if csv_date : return dt.datetime.strptime(csv_date, '%d/%m/%Y').date()
 	else : return None
 
 def homme_ou_femme(title):
 	if title == "Mlle" or title == 'Mme' : return "F"
 	elif title == "M." : return "H"
 	else : return "?"
-
-def adherents_actifs() :
-	''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
-	return Adherent.objects.annotate(max_date=Max('date_derniere_cotisation')).filter(date_derniere_cotisation=F('max_date'))
-	# can't use Adherent.objects.all().order_by('date_derniere_cotisation').distinct('num_adherent') on sqlite, so using .values_list('num_adherent', flat=True).distinct() instead
-
-
-def actualiser_les_adherents(request) :
-	if request.user.has_perm('fichiers_adherents.peut_televerser'):
-		actualisation_des_adherents()
-		return redirect('fichier__adherents')
-	else:
-		messages.error(request, "Vous n'avez pas les droits d'accès au téléversement du fichier des adhérents.")
-		return redirect('/')
-
 
 
 @method_decorator(login_required, name='dispatch')
@@ -191,14 +187,16 @@ class ListeDesAdherents(ListView):
 		context['page_title'] = 'Fichier des adhérents'
 		context['csv'] = fichier_csv(self.request)
 		context['list_actions'] = [
-			{'text': 'Actualiser', 'url': reverse('fichier__actualiser')},
 			{'text': 'Administrer', 'url': reverse('admin:fichiers_adherents_adherent_changelist')},
 			]
 		return context
 
 
+
 def adherents_visibles(request):
-	# Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir
+	
+	''' Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir '''
+	
 	try : droits = request.user.droits_set.all()
 	except ObjectDoesNotExist :
 		messages.error(request, "Vous n'avez pas de droits d'accès au fichier.")
@@ -213,13 +211,15 @@ def adherents_visibles(request):
 			else :
 				departements.add(query)
 		departements = list(departements)
-		return Adherent.objects.filter(actuel=True, federation__in=departements)
+		return adherents_actuels().filter(federation__in=departements)
+		# TODO : querify like in phoning app ?
+
 
 
 @login_required
 def VueAdherent(request, num_adherent):
 
-	adherent = get_object_or_404(Adherent, num_adherent=num_adherent, actuel=True)
+	adherent = get_object_or_404(Adherent, num_adherent=num_adherent, fichier=FichierAdherents.objects.latest())
 	if adherent in adherents_visibles(request) :
 		return render(request, 'fichiers_adherents/adherent.html', {
 			'adherent': adherent,
@@ -245,3 +245,19 @@ def fichier_csv(request):
 			]
 		csvContent += ";".join(data) + "\n"
 	return csvContent
+
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class DroitsDeLecture(ListView):
+
+	model = Droits
+	template_name = 'fichiers_adherents/droits_de_lecture.html'
+
+	def get_context_data(self, **kwargs):
+		context = super(DroitsDeLecture, self).get_context_data(**kwargs)
+		context['page_title'] = "Droits de lecture du fichier des adhérents"
+#		context['url_by_id'] = True
+#		context['url_prefix'] = reverse('admin:fichiers_adherents_adherent_changelist') # changelist because addinng id after
+		context['admin_url'] = reverse('admin:fichiers_adherents_droits_changelist')
+		return context

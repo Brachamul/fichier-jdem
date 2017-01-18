@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, render, render_to_response, redi
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
-from fichiers_adherents.models import Adherent, Note, WrongNumber
+from fichiers_adherents.models import Adherent, Note, WrongNumber, adherents_actuels
 
 from .models import *
 from .forms import *
@@ -108,7 +108,9 @@ def coordonnees(request, operation_id):
 				query = ast.literal_eval(operation.query) # admin-written query transformed into useable filter
 				adherents_called_successfully = operation.targets_called_successfully.all()
 				adherents_with_wrong_number = operation.targets_with_wrong_number.all()
-				operation_targets = Adherent.objects.filter(**query).exclude(pk__in=adherents_called_successfully).exclude(pk__in=adherents_with_wrong_number)
+				operation_targets = adherents_actuels().filter(**query)\
+					.exclude(pk__in=adherents_called_successfully)\
+					.exclude(pk__in=adherents_with_wrong_number)
 				if operation_targets.count() < 1 : 
 					messages.success(request, "Tous les adhérents de cette opération ont déjà été contactés !")
 					return redirect('phoning')

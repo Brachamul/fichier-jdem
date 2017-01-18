@@ -30,3 +30,17 @@
 
 
 {% endblock content %}
+
+
+
+{% block scripts %}{{ block.super}}
+
+<script>
+$('#id_fichier_csv').change(function(){
+	var filename = $(this).val().replace("C:\\fakepath\\", "")
+	var possible_date = filename.slice(0, 10)
+	$('#id_date').val(possible_date)
+})
+</script>
+
+{% endblock %}
