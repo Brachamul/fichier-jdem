@@ -7,13 +7,26 @@ from django.contrib.auth.models import User
 from fichiers_adherents.models import Adherent, FichierAdherents, Note, WrongNumber
 from phoning.models import Operation
 
+
+
+class LoginTestCase(TestCase):
+
+	def setUp(self):
+
+		self.client = Client()
+		self.test_user = User.objects.create_user('MonsieurPatate', 'monsieur.patate@potato.farm', 'potato')
+
+	def test_account_creation_and_login(self):
+		login = self.client.login(username='MonsieurPatate', password='potato')
+		self.assertEqual(login, True)
+
+
+
 class CoordoneesTestCase(TestCase):
 
 	def setUp(self):
 
 		self.client = Client()
-
-
 		self.today = dt.datetime.now().date()
 		self.test_user = User.objects.create_user('MonsieurPatate', 'monsieur.patate@potato.farm', 'potato')
 		self.test_fichier = FichierAdherents.objects.create(date=self.today, importateur=self.test_user)
@@ -50,10 +63,15 @@ class CoordoneesTestCase(TestCase):
 			tel_portable="06 72 82 17 27",
 			)
 
+	def test_operation_created(self):
+		operation_name = "Opé Test"
+		operation = Operation.objects.get(name=operation_name)
+		self.assertEqual(operation.name, operation_name)
 
 	def test_coordonees_can_be_displayed(self):
 		operation = Operation.objects.get(name="Opé Test")
 		login = self.client.login(username='MonsieurPatate', password='potato')
 		url = reverse('coordonnees', kwargs={'operation_id': operation.pk})
 		response = self.client.get(url)
+		print(response)
 		self.assertEqual(response.status_code, 200)

@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from fichiers_adherents.models import *
 
 
-class TestObjectCreations(TestCase):
+class AdherentTestCase(TestCase):
 
 	def setUp(self):
 
@@ -17,7 +17,7 @@ class TestObjectCreations(TestCase):
 		self.test_user = User.objects.create(username="Monsieur Patate")
 		self.test_fichier = FichierAdherents.objects.create(date=self.today, importateur=self.test_user)
 
-	def test_signal_verifier_si_a_jour(self):
+	def test_calculer_si_actif_on_save(self):
 
 		test_adherent = Adherent.objects.create(
 			fichier = self.test_fichier,
