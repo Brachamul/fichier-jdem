@@ -16,22 +16,25 @@ from django.views.generic import TemplateView, DetailView, ListView, FormView, C
 
 from .models import *
 
+
+
 class WrongSecret(Exception): pass
 
 def Identify(request):
 	''' Let's go to the provider and log into it to ask for authorization '''
-	return redirect(settings.NETWORK_AUTH_URL + 'identify/' + settings.NETWORK_AUTH_KEY)
+	return redirect(settings.AUTH_NETWORK_URL + 'identify/' + settings.AUTH_NETWORK_KEY)
 
 @csrf_exempt # TODO : make sure this isn't stupid
 def SetToken(request, user_uuid, token, app_secret):
 	print('==========')
 	print(request.path)
 	# secretly sets a new authentication token as the user's password
-	if app_secret != settings.NETWORK_AUTH_SECRET : raise WrongSecret
-	print('==========')
-	print('user_uuid : ' + user_uuid)
+	if app_secret != settings.AUTH_NETWORK_SECRET : raise WrongSecret
 	network_user, created = NetworkUser.objects.get_or_create(uuid=uuid.UUID(user_uuid))
-	network_user.update_user_details()
+	try:
+		network_user.update_user_details()
+	except UserCreationError:
+		return HttpResponse(status=409)
 	network_user.user.set_password(token)
 	network_user.user.save()
 	return HttpResponse('Token succesfully set to ' + token)

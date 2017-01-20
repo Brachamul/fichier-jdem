@@ -74,7 +74,6 @@ def televersement(request):
 				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
 				nouveau_fichier.save()
 				importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
-				verifier_si_les_adherents_sont_a_jour(nouveau_fichier)
 				emails.prevenir_du_chargement_dun_nouveau_fichier()
 				return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
 			else:

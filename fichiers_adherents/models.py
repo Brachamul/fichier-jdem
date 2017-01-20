@@ -118,6 +118,9 @@ class Adherent(models.Model):
 	canton = models.CharField(max_length=255, null=True, blank=True)
 	a_jour_de_cotisation = models.BooleanField(default=False)
 
+	def save(self, *args, **kwargs):
+		self.a_jour_de_cotisation = self.calculer_si_actif()
+		super(Adherent, self).save(*args, **kwargs)
 
 	# Utilitaires
 	
@@ -141,6 +144,12 @@ class Adherent(models.Model):
 		except Adherent.DoesNotExist : return False
 		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
 
+	def calculer_si_actif(self):
+		derniere_cotisation = self.date_derniere_cotisation
+		if isinstance(derniere_cotisation, dt.datetime) : # for some reason the datefield sometimes contains datetime values
+			derniere_cotisation = derniere_cotisation.date()
+		return derniere_cotisation > self.fichier.date - dt.timedelta(days=730.5) # 2 ans
+
 	# Meta
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
@@ -152,19 +161,18 @@ class Adherent(models.Model):
 		verbose_name = "adhérent".encode('utf-8')
 		verbose_name_plural = 'adhérents'.encode('utf-8')
 
-@transaction.atomic
-def verifier_si_les_adherents_sont_a_jour(fichier):
-	for adherent in fichier.adherent_set.all() :
-		derniere_cotisation = adherent.date_derniere_cotisation
-		if isinstance(derniere_cotisation, dt.datetime) : # for some reason the datefield sometimes contains datetime values
-			derniere_cotisation = derniere_cotisation.date()
-		adherent.a_jour_de_cotisation = derniere_cotisation > fichier.date - dt.timedelta(days=730.5) # 2 ans
-		adherent.save()
 
 
 
 def adherents_actuels() :
+	
+	''' Renvoie la liste des adhérents actuels, c'est à dire
+	provenant du fichier le plus récent, et ayant adhéré
+	ou réadhéré moins de 2 ans plus tôt.'''
+
 	fichier_le_plus_recent = FichierAdherents.objects.latest()
+	for adherent in Adherent.objects.filter(fichier=fichier_le_plus_recent) :
+		print(adherent.prenom, adherent.nom, adherent.a_jour_de_cotisation)
 	return Adherent.objects.filter(
 		fichier=fichier_le_plus_recent,
 		a_jour_de_cotisation=True,
@@ -201,7 +209,7 @@ class Droits(models.Model):
 	des lecteurs qui auront droit d'accès pour lire ces membres dans leur fichier '''
 
 	name = models.CharField(max_length=250)
-	readers = models.ManyToManyField(User, through='Lecteur')
+	readers = models.ManyToManyField(User, through='Reader')
 	query = models.CharField(max_length=5000) # ex : {'federation__in': [8,10,51,52,54,55,57,67,68,88], 'date_derniere_cotisation__year':'2016'}
 
 	class Meta:
@@ -212,11 +220,13 @@ class Droits(models.Model):
 	def __str__(self): return self.name
 
 
-class Lecteur(models.Model):
+class Reader(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	droits = models.ForeignKey(Droits, on_delete=models.CASCADE)
 	date = models.DateTimeField(auto_now=True)
-	def __str__(self): return str(self.user)
+	class Meta :
+		verbose_name = "Lecteur"
+		def __str__(self): return str(self.user)
 
 
 class Cnil(models.Model):

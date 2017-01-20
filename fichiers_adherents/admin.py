@@ -32,13 +32,13 @@ admin.site.register(Note, NoteAdmin)
 
 
 
-class LecteursInline(admin.TabularInline):
-	model = Lecteur
+class ReadersInline(admin.TabularInline):
+	model = Reader
 	extra = 1
 
 class DroitsAdmin(admin.ModelAdmin):
 	model = Droits
-	inlines = [LecteursInline, ]
+	inlines = [ReadersInline, ]
 	list_per_page = 1000
 
 admin.site.register(Droits, DroitsAdmin)
