@@ -29,8 +29,6 @@ class NetworkUser(models.Model):
 		''' This will either generate or update a NetworkUser
 		based on the data sent by the auth_network '''
 
-		print('USER DETAILS : ', user_details)
-
 		if not self.user :
 			# If the user doesn't already exist in this client app,
 			# we'll need to create an account for them

@@ -1,4 +1,4 @@
-import logging
+import logging, json
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -26,11 +26,12 @@ def Identify(request):
 
 @csrf_exempt # TODO : make sure this isn't stupid
 def SetToken(request, user_uuid):
-	print('POST : ', request.POST)
+	
 	secret = request.POST.get('secret')
-	new_token = request.POST.get('new_token'),
-	user_details = request.POST.get('user_details')
-	print('USER DETAILS : ', user_details)
+	new_token = request.POST.get('new_token')
+	user_details_json = request.POST.get('user_details')
+	user_details = json.loads(user_details_json)
+
 	# secretly sets a new authentication token as the user's password
 	if secret != settings.AUTH_NETWORK_SECRET : raise WrongSecret
 	network_user, created = NetworkUser.objects.get_or_create(uuid=uuid.UUID(user_uuid))
@@ -38,12 +39,10 @@ def SetToken(request, user_uuid):
 	except UserCreationError: return HttpResponse(status=409)
 	network_user.user.set_password(new_token)
 	network_user.user.save()
-	return HttpResponse('Token succesfully set to ' + new_token)
+	return HttpResponse('Token succesfully set to ' + str(new_token))
 
 def CallBack(request, user_uuid, token):
 	# token is checked against new password to see if it matches
-	print('==========')
-	print(request.path)
 	network_user = get_object_or_404(NetworkUser, uuid=user_uuid)
 	user = authenticate(username=network_user.user.username, password=token)
 	url_to_redirect = request.POST.get('next')
