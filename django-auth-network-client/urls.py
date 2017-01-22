@@ -5,6 +5,6 @@ from . import views
 
 urlpatterns = [
 	url(r'^$', views.Identify, name='auth_network'),
-	url(r'^set-token/(?P<user_uuid>[\x00-\x7F]+)/(?P<token>[\x00-\x7F]+)/(?P<app_secret>[\x00-\x7F]+)/$', views.SetToken, name='auth_network_set_token'),
+	url(r'^set-token/(?P<user_uuid>[\x00-\x7F]+)/$', views.SetToken, name='auth_network_set_token'),
 	url(r'^callback/(?P<user_uuid>[\x00-\x7F]+)/(?P<token>[\x00-\x7F]+)/$', views.CallBack, name='auth_network_callback'),
 ]

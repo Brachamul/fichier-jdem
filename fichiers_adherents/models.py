@@ -170,11 +170,8 @@ def adherents_actuels() :
 	provenant du fichier le plus récent, et ayant adhéré
 	ou réadhéré moins de 2 ans plus tôt.'''
 
-	fichier_le_plus_recent = FichierAdherents.objects.latest()
-	for adherent in Adherent.objects.filter(fichier=fichier_le_plus_recent) :
-		print(adherent.prenom, adherent.nom, adherent.a_jour_de_cotisation)
 	return Adherent.objects.filter(
-		fichier=fichier_le_plus_recent,
+		fichier=FichierAdherents.objects.latest(),
 		a_jour_de_cotisation=True,
 		)
 
