@@ -25,19 +25,20 @@ def Identify(request):
 	return redirect(settings.AUTH_NETWORK_URL + 'identify/' + settings.AUTH_NETWORK_KEY)
 
 @csrf_exempt # TODO : make sure this isn't stupid
-def SetToken(request, user_uuid, token, app_secret):
-	print('==========')
-	print(request.path)
+def SetToken(request, user_uuid):
+	print('POST : ', request.POST)
+	secret = request.POST.get('secret')
+	new_token = request.POST.get('new_token'),
+	user_details = request.POST.get('user_details')
+	print('USER DETAILS : ', user_details)
 	# secretly sets a new authentication token as the user's password
-	if app_secret != settings.AUTH_NETWORK_SECRET : raise WrongSecret
+	if secret != settings.AUTH_NETWORK_SECRET : raise WrongSecret
 	network_user, created = NetworkUser.objects.get_or_create(uuid=uuid.UUID(user_uuid))
-	try:
-		network_user.update_user_details()
-	except UserCreationError:
-		return HttpResponse(status=409)
-	network_user.user.set_password(token)
+	try: network_user.update_user_details(user_details)
+	except UserCreationError: return HttpResponse(status=409)
+	network_user.user.set_password(new_token)
 	network_user.user.save()
-	return HttpResponse('Token succesfully set to ' + token)
+	return HttpResponse('Token succesfully set to ' + new_token)
 
 def CallBack(request, user_uuid, token):
 	# token is checked against new password to see if it matches
