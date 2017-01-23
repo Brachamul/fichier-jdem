@@ -29,15 +29,18 @@ class NetworkUser(models.Model):
 		''' This will either generate or update a NetworkUser
 		based on the data sent by the auth_network '''
 
+		print("in method - user_details['email'] : " + user_details['email'])
+
 		if not self.user :
 			# If the user doesn't already exist in this client app,
 			# we'll need to create an account for them
 			try :
-				self.user = User.objects.create_user(user_details['username'])
+				self.user = User.objects.create_user(**user_details)
 			except IntegrityError :
 				raise UserCreationError
 			self.save()
-
-		# Now, update the user's account with details from the auth_network
-		User.objects.filter(pk=self.user.pk).update(**user_details) # 
+		else :
+			# Otherwise, just update the user's account with more recent details
+			User.objects.filter(pk=self.user.pk).update(**user_details) # 
+	
 		self.user.save()
