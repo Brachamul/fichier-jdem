@@ -33,11 +33,12 @@ class NetworkUser(models.Model):
 			# If the user doesn't already exist in this client app,
 			# we'll need to create an account for them
 			try :
-				self.user = User.objects.create_user(user_details['username'])
+				self.user = User.objects.create_user(**user_details)
 			except IntegrityError :
 				raise UserCreationError
 			self.save()
 
-		# Now, update the user's account with details from the auth_network
-		User.objects.filter(pk=self.user.pk).update(**user_details) # 
-		self.user.save()
+		else :
+			# Otherwise, just update the user's account with more recent details
+			user = User.objects.filter(pk=self.user.pk) #
+			user.update(**user_details)
