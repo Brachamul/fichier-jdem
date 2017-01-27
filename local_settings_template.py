@@ -17,6 +17,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'fichier@jdem.fr'
 EMAIL_HOST_PASSWORD = '-'
 EMAIL_ROOT = 'http://localhost:8008'
+EMAIL_FROM = 'Fichier JDem <fichier@jdem.fr>'
 
 # LOGGING SETTINGS
 LOGGING = {

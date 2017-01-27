@@ -73,10 +73,16 @@ def televersement(request):
 					date = dt.datetime.strptime(date, '%Y-%m-%d').date() # converts date from 'XXXX-XX-XX' format to datetime.date
 					nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
 					nouveau_fichier.save()
-					importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
-					emails.prevenir_du_chargement_dun_nouveau_fichier()
-					# SUCCESS !
-					return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
+					try :
+						importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
+						emails.prevenir_du_chargement_dun_nouveau_fichier()
+					except Exception as e:
+						# UNEXPECTED ERROR
+						messages.error(request, str(e))
+						nouveau_fichier.delete() # Supprime le fichier et les adhérents associés
+					else : 
+						# SUCCESS !
+						return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
 				else :
 					# Fichier with date already exists
 					messages.error(request, "Un fichier établit à la même date existe déjà dans la base !")
