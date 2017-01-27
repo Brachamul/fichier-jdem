@@ -30,6 +30,8 @@
 	<p>Vous avez les droits de consultation pour :
 		{% for droits in user.droits_set.all %}<span class="tag tag-default">{{ droits }}</span> {% endfor %}
 	</p>
+{% else %}
+	<div class="alert alert-info">Vous n'avez pas de droits de consultation du fichier.</div>
 {% endif %}
 
 <div class="table-responsive">

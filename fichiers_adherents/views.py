@@ -65,25 +65,34 @@ def televersement(request):
 		if request.method == "POST":
 			upload_form = TéléversementDuFichierAdherentForm(request.POST, request.FILES)
 			if upload_form.is_valid():
-				logging.info("A new adherent file was uploaded by {user}.".format(user=request.user).encode('utf8'))
-				fichier = request.FILES['fichier_csv']
-				importateur = request.user
 				date = request.POST.get('date')
-				fichier.name = ('fichiers_adherents/' + date + '_' + request.user.username + '.csv') # renomme le fichier
-				date = dt.datetime.strptime(date, '%Y-%m-%d').date() # converts date from 'XXXX-XX-XX' format to datetime.date
-				nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
-				nouveau_fichier.save()
-				importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
-				emails.prevenir_du_chargement_dun_nouveau_fichier()
-				return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
-			else:
-				return render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
-		else:
+				if not FichiersAdherents.objects.filter(date=date) :
+					fichier = request.FILES['fichier_csv']
+					importateur = request.user
+					fichier.name = ('fichiers_adherents/' + date + '_' + request.user.username + '.csv') # renomme le fichier
+					date = dt.datetime.strptime(date, '%Y-%m-%d').date() # converts date from 'XXXX-XX-XX' format to datetime.date
+					nouveau_fichier = FichierAdherents(importateur=importateur, fichier_csv=fichier, date=date) # rattache le fichier à la base des fichiers importés
+					nouveau_fichier.save()
+					importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
+					emails.prevenir_du_chargement_dun_nouveau_fichier()
+					# SUCCESS !
+					return redirect('visualisation_du_fichier_adherent', fichier_id=nouveau_fichier.id )
+				else :
+					# Fichier with date already exists
+					messages.error(request, "Un fichier établit à la même date existe déjà dans la base !")
+			else :
+				# Form is not valid, overriding form with default empty form
+				upload_form = TéléversementDuFichierAdherentForm()
+				messages.error(request, "Le formulaire n'était pas valide.")
+		else :
+			# Request is not post, this is just the user accessing the page normally
 			upload_form = TéléversementDuFichierAdherentForm()
-			return render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
+		render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
 	else:
+		# The user doesn't have the rights to access this page
 		messages.error(request, "Vous n'avez pas les droits d'accès au téléversement du fichier des adhérents.")
 		return redirect('admin')
+
 
 @login_required
 def visualisation_du_fichier_adherent(request, fichier_id):
@@ -196,9 +205,8 @@ def adherents_visibles(request):
 	
 	''' Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir '''
 	
-	try : droits = request.user.droits_set.all()
-	except ObjectDoesNotExist :
-		messages.error(request, "Vous n'avez pas de droits d'accès au fichier.")
+	droits = request.user.droits_set.all()
+	if not droits :
 		return []
 	else :
 		departements = set()
@@ -210,7 +218,8 @@ def adherents_visibles(request):
 			else :
 				departements.add(query)
 		departements = list(departements)
-		return adherents_actuels().filter(federation__in=departements)
+		result = adherents_actuels().filter(federation__in=departements)
+		return result
 		# TODO : querify like in phoning app ?
 
 

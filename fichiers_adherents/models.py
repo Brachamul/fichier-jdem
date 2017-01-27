@@ -33,6 +33,9 @@ class FichierAdherents(models.Model):
 		''' liste les adherents ayant été importés par ce fichier '''
 		return self.adherent_set.filter(a_jour_de_cotisation=True)
 
+	def fichier_precedent(self) :
+		return self.get_previous_by_date()
+
 	def nouveaux_adherents(self) :
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 		nouveaux_adherents = []
@@ -117,9 +120,11 @@ class Adherent(models.Model):
 	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élue dans une autre commune que sa ville de résidence.
 	canton = models.CharField(max_length=255, null=True, blank=True)
 	a_jour_de_cotisation = models.BooleanField(default=False)
+	trop_vieux = models.BooleanField(default=False)
 
 	def save(self, *args, **kwargs):
 		self.a_jour_de_cotisation = self.calculer_si_actif()
+		self.trop_vieux = self.calculer_si_trop_vieux()
 		super(Adherent, self).save(*args, **kwargs)
 
 	# Utilitaires
@@ -149,6 +154,13 @@ class Adherent(models.Model):
 			derniere_cotisation = derniere_cotisation.date()
 		return derniere_cotisation > self.fichier.date - dt.timedelta(days=730.5) # 2 ans
 
+	def calculer_si_trop_vieux(self):
+		naissance = self.date_de_naissance
+		if not naissance : return True # sans date, on considère que l'adhérent est trop âgé
+		if isinstance(naissance, dt.datetime) : # for some reason the datefield sometimes contains datetime values
+			naissance = naissance.date()
+		return naissance < dt.datetime.now().date() - dt.timedelta(days=12053.25) # 33 ans
+
 	# Meta
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
@@ -177,6 +189,7 @@ def adherents_actuels() :
 		return Adherent.objects.filter(
 			fichier=dernier_fichier,
 			a_jour_de_cotisation=True,
+			trop_vieux=False,
 			)
 
 
