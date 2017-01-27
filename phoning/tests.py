@@ -73,5 +73,4 @@ class CoordoneesTestCase(TestCase):
 		login = self.client.login(username='MonsieurPatate', password='potato')
 		url = reverse('coordonnees', kwargs={'operation_id': operation.pk})
 		response = self.client.get(url)
-		print(response)
 		self.assertEqual(response.status_code, 200)
