@@ -156,7 +156,7 @@ EMAIL_SHOULD_FAIL_SILENTLY = True
 EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"  # or sendgrid.SendGridBackend, or...
 
 ANYMAIL = {
-	"MAILGUN_API_KEY": "key-7339362bdf13cc475b5666b6979d422b",
+	"MAILGUN_API_KEY": "_",
 	"MAILGUN_SENDER_DOMAIN": "mailgun.jdem.fr",
 }
 '''

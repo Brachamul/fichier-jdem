@@ -135,8 +135,7 @@ class Adherent(models.Model):
 		except NameError : return "Anonyme"
 
 	def is_new(self, fichier):
-		try : adherent_actuel_correspondant = Adherent.objects.filter(num_adherent=self.num_adherent).exclude(fichier=fichier).latest()
-		except Adherent.DoesNotExist : return True
+		if adherents_actuels().filter(num_adherent=self.num_adherent) : return True
 		else : return False
 
 	def has_resubbed(self, fichier):
@@ -170,10 +169,15 @@ def adherents_actuels() :
 	provenant du fichier le plus récent, et ayant adhéré
 	ou réadhéré moins de 2 ans plus tôt.'''
 
-	return Adherent.objects.filter(
-		fichier=FichierAdherents.objects.latest(),
-		a_jour_de_cotisation=True,
-		)
+	try :
+		dernier_fichier = FichierAdherents.objects.latest()
+	except FichierAdherents.DoesNotExist :
+		return Adherent.objects.all() # empty queryset
+	else :
+		return Adherent.objects.filter(
+			fichier=dernier_fichier,
+			a_jour_de_cotisation=True,
+			)
 
 
 

@@ -15,7 +15,7 @@ def prevenir_du_chargement_dun_nouveau_fichier() :
 	# TODO : customiser pour dire le nombre de nouveaux adhérents et compagnie
 
 	email_multiple_users(
-		users = User.objects.filter(lecteur=True),
+		users = User.objects.filter(reader=True),
 		title = 'Un nouveau fichier adhérent est disponible !',
 		text = \
 		'''
