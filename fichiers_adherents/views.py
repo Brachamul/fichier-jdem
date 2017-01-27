@@ -118,9 +118,9 @@ def query_checker(request):
 			query = request.POST.get('query')
 		try:
 			query_dict = ast.literal_eval(query)
-			object_list = Adherent.objects.filter(**query_dict)
-		except ValueError as e:
-			messages.error(request, repr(e))
+			object_list = adherents_actuels().filter(**query_dict)
+		except Exception as e:
+			messages.error(request, str(e))
 		return render(request, 'fichiers_adherents/query_checker.html', {
 			'page_title': "Query Checker",
 			'query': query,
@@ -227,6 +227,7 @@ def adherents_visibles(request):
 		result = adherents_actuels().filter(federation__in=departements)
 		return result
 		# TODO : querify like in phoning app ?
+
 
 
 
