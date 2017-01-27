@@ -40,26 +40,38 @@ class FichierAdherents(models.Model):
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 		nouveaux_adherents = []
 		for adherent in self.adherents_a_jour():
-			if adherent.is_new(fichier=self) :
+			if adherent.est_nouveau(fichier=self) :
 				nouveaux_adherents.append(adherent)
 		return nouveaux_adherents
 
 	def resubbed(self) :
 		''' liste le nombre d'adhérents qui ont réadhéré '''
-		adherents_maj = []
+		result = []
 		for adherent in self.adherent_set.all():
 			if adherent.has_resubbed(fichier=self) :
-				adherents_maj.append(adherent)
-		return adherents_maj
+				result.append(adherent)
+		return result
 
 	def expired(self):
-		expiration_window_end = self.date - dt.timedelta(days=730.50) # 2 years
-		expiration_window_start = expiration_window_end - dt.timedelta(days=self.jours_depuis_le_fichier_precedent())
-		return self.adherent_set.filter(
-			a_jour_de_cotisation=False,
-			date_derniere_cotisation__lt = expiration_window_end,
-			date_derniere_cotisation__gt = expiration_window_start
-			)
+		''' liste le nombre d'adhérents qui n'ont pas réadhéré '''
+		result = []
+		try :
+			fichier_precedent = self.get_previous_by_date()
+		except FichierAdherents.DoesNotExist :
+			return result
+		else :
+			for adherent in fichier_precedent.adherents_a_jour():
+				# pour chaque adhérent à jour dans le fichier précédent
+				# on regarde s'il existe toujours et est à jour dans le fichier actuel
+				try :
+					Adherent.objects.get(
+						fichier=self,
+						num_adherent=adherent.num_adherent,
+						a_jour_de_cotisation=True
+						)
+				except Adherent.DoesNotExist :
+					result.append(adherent)
+			return result
 
 	def date_de_ce_fichier(self) :
 		''' cherche la dernière date mentionnée dans le fichier '''
@@ -67,11 +79,12 @@ class FichierAdherents(models.Model):
 		return latest_entry.date_derniere_cotisation
 
 	def jours_depuis_le_fichier_precedent(self) :
-		try : date_du_fichier_actuel = Adherent.objects.exclude(fichier=self).latest().date_derniere_cotisation
-		except Adherent.DoesNotExist :
+		try :
+			fichier_precedent = self.get_previous_by_date()
+		except FichierAdherents.DoesNotExist :
 			return False
 		else :
-			return (self.date_de_ce_fichier() - date_du_fichier_actuel).days
+			return (self.date - fichier_precedent.date).days
 
 	def __str__(self):
 		return "Fichier du {}, importé le {} par {}".format(self.date, self.date_d_import.date(), self.importateur)
@@ -139,14 +152,23 @@ class Adherent(models.Model):
 		try : return self.prenom + " " + self.nom
 		except NameError : return "Anonyme"
 
-	def is_new(self, fichier):
-		if adherents_actuels().filter(num_adherent=self.num_adherent) : return True
-		else : return False
+	def est_nouveau(self, fichier):
+		# regarde si l'adhérent existait déjà dans le fichier précédent
+		try :
+			adherent_ancien = Adherent.objects.get(fichier=fichier.get_previous_by_date(), num_adherent=self.num_adherent)
+		except (Adherent.DoesNotExist, FichierAdherents.DoesNotExist) :
+			return True
+		else :
+			return False
 
 	def has_resubbed(self, fichier):
-		try : adherent_actuel_correspondant = Adherent.objects.filter(num_adherent=self.num_adherent).exclude(fichier=fichier).latest()
-		except Adherent.DoesNotExist : return False
-		else : return adherent_actuel_correspondant.date_derniere_cotisation < self.date_derniere_cotisation
+		# regarde si l'adhérent a réadhéré depuis le fichier précédent
+		try :
+			adherent_ancien = Adherent.objects.get(fichier=fichier.get_previous_by_date(), num_adherent=self.num_adherent)
+		except (Adherent.DoesNotExist, FichierAdherents.DoesNotExist) :
+			return False
+		else :
+			return adherent_ancien.date_derniere_cotisation < self.date_derniere_cotisation
 
 	def calculer_si_actif(self):
 		derniere_cotisation = self.date_derniere_cotisation
