@@ -32,10 +32,19 @@ class NetworkUser(models.Model):
 		if not self.user :
 			# If the user doesn't already exist in this client app,
 			# we'll need to create an account for them
-			try :
-				self.user = User.objects.create_user(**user_details)
-			except IntegrityError :
-				raise UserCreationError
+			
+			# check if a user with that username doesn't already exist
+			user_with_same_username = User.objects.get(username=user_details['username'])
+			if user_with_same_username :
+				# if there is already a user with that username, we tie the network user to it
+				# this is a recovery feature, not supposed to actually be used
+				self.user = user_with_same_username
+			else :
+				# otherwise, let's try and create the user
+				try :
+					self.user = User.objects.create_user(**user_details)
+				except IntegrityError :
+					raise UserCreationError
 			self.save()
 
 		else :
