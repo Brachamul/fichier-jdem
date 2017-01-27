@@ -35,8 +35,12 @@ def SetToken(request, user_uuid):
 	# secretly sets a new authentication token as the user's password
 	if secret != settings.AUTH_NETWORK_SECRET : raise WrongSecret
 	network_user, created = NetworkUser.objects.get_or_create(uuid=uuid.UUID(user_uuid))
-	try: network_user.update_user_details(user_details)
-	except UserCreationError: return HttpResponse(status=409)
+	try:
+		network_user.update_user_details(user_details)
+	except UserCreationError:
+		# user creation failed, deleting network_user
+		network_user.delete()
+		return HttpResponse(status=409)
 	network_user.user.set_password(new_token)
 	network_user.user.save()
 	return HttpResponse('Token succesfully set to ' + str(new_token))
