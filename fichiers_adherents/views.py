@@ -66,7 +66,7 @@ def televersement(request):
 			upload_form = TéléversementDuFichierAdherentForm(request.POST, request.FILES)
 			if upload_form.is_valid():
 				date = request.POST.get('date')
-				if not FichiersAdherents.objects.filter(date=date) :
+				if not FichierAdherents.objects.filter(date=date) :
 					fichier = request.FILES['fichier_csv']
 					importateur = request.user
 					fichier.name = ('fichiers_adherents/' + date + '_' + request.user.username + '.csv') # renomme le fichier
