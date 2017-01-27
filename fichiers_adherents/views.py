@@ -87,7 +87,7 @@ def televersement(request):
 		else :
 			# Request is not post, this is just the user accessing the page normally
 			upload_form = TéléversementDuFichierAdherentForm()
-		render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
+		return render(request, 'fichiers_adherents/upload.html', {'upload_form': upload_form, 'page_title': "Téléverser un fichier adhérents"})
 	else:
 		# The user doesn't have the rights to access this page
 		messages.error(request, "Vous n'avez pas les droits d'accès au téléversement du fichier des adhérents.")
