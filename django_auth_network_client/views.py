@@ -20,6 +20,10 @@ from .models import *
 
 class WrongSecret(Exception): pass
 
+def Warn(request):
+	''' Tell the user they will get redirected '''
+	return render(request, 'django_auth_network_client/warn.html')
+
 def Identify(request):
 	''' Let's go to the provider and log into it to ask for authorization '''
 	return redirect(settings.AUTH_NETWORK_URL + 'identify/' + settings.AUTH_NETWORK_KEY)

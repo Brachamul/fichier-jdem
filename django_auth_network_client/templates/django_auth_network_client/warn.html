@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}{{ block.super }}
+
+<div style="max-width: 640px; margin: auto;">
+
+<h1>Authentification</h1>
+
+<p>Pour accéder à cette application, vous devez vous authentifier via <strong>Centrifuge</strong>.</p>
+<p>
+	<a class="btn btn-primary btn-block" href="{% url 'auth_network_identify' %}">
+		<i class="fa fa-power-off"></i> Accéder à Centrifuge
+	</a>
+</p>
+</form>
+
+<br/><br/>
+
+</div>
+
+{% endblock content %}
