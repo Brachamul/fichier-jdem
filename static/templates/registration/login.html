@@ -3,7 +3,8 @@
 
 {% block content %}
 
-<form class="col-sm-8 col-md-6 col-lg-4" style="margin:auto; float: none;" action="" method="post" enctype="multipart/form-data">
+<div style="max-width: 640px; margin: auto;">
+<form action="" method="post" enctype="multipart/form-data">
 	<h1>Authentification</h1>
 	<hr>
 	{% csrf_token %}
@@ -20,5 +21,6 @@
 		{% endcomment %}
 		<p style="text-align: center; font-size: .8em;">Pour obtenir un compte, appeler Antonin !</p>
 </form>
+</div>
 
 {% endblock %}
