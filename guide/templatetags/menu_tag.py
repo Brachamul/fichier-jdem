@@ -6,4 +6,4 @@ register = template.Library()
 
 @register.simple_tag
 def wagtail_custom_menu():
-	return {'menu_items': Article.objects.all() }
+	return Article.objects.all().exclude(slug="accueil")
