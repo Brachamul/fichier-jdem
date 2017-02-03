@@ -5,7 +5,7 @@ from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 
 
-class Accueil(Page):
+class Article(Page):
     body = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
