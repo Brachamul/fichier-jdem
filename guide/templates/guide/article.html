@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load wagtailcore_tags %}
+{% load wagtailuserbar %}
+
+{% wagtailuserbar %}
+
+
+
+{% block content %}{{ block.super }}
+
+<div class="col-sm-12">
+
+	<article>
+		<h1>{{ page.title }}</h1>
+		{{ page.body|richtext }}
+	</article>
+
+</div>
+
+<style>
+
+	body {
+		background-color: hsl( 202.6, 100%, 25% ) !important;
+	}
+
+	nav { box-shadow: 0 0 2rem -0rem rgba(0,0,0,.5); }
+
+	article {
+		max-width: 48rem;
+		margin: 2rem auto;
+		padding: 0 3rem 2rem;
+		border: 1px solid #eee;
+		background-image: url('https://d1wli5mq9yq9mw.cloudfront.net/static/images/bg_main.gif');
+		box-shadow: 0 0 2rem -0rem rgba(0,0,0,.5);
+	}
+
+	article h1 { margin: 2rem 0; }
+
+</style>
+
+{% endblock %}
+
+

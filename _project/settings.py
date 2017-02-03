@@ -145,6 +145,32 @@ NETWORK_AUTH_KEY	= 'PLEASE SET NETWORK_AUTH_KEY' # UUID
 NETWORK_AUTH_SECRET	= 'PLEASE SET NETWORK_AUTH_SECRET' # UUID
 
 
+# WAGTAIL CMS
+
+INSTALLED_APPS += [
+	'wagtail.wagtailforms',
+	'wagtail.wagtailredirects',
+	'wagtail.wagtailembeds',
+	'wagtail.wagtailsites',
+	'wagtail.wagtailusers',
+	'wagtail.wagtailsnippets',
+	'wagtail.wagtaildocs',
+	'wagtail.wagtailimages',
+	'wagtail.wagtailsearch',
+	'wagtail.wagtailadmin',
+	'wagtail.wagtailcore',
+	'modelcluster',
+	'taggit',
+	'guide', # our local wagtail app
+	]
+
+MIDDLEWARE_CLASSES += [
+	'wagtail.wagtailcore.middleware.SiteMiddleware',
+	'wagtail.wagtailredirects.middleware.RedirectMiddleware',
+	]
+
+WAGTAIL_SITE_NAME = "du guide des responsables de fédérations"
+
 #TODO : add some logging
 
 '''

@@ -1,4 +1,6 @@
-<nav class="navbar navbar-full navbar-dark bg-inverse">
+{% load menu_tag %}
+
+<nav class="navbar navbar-full navbar-dark">
 	<div class="navbar-header" style="text-align: right;">
 		<a class="navbar-brand pull-left" href="/">
 			<img src="/static/Purchase Order-104.png" height="30"
@@ -39,6 +41,16 @@
 			</li>
 			{% endif %}
 
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Guide</a>
+				<div class="dropdown-menu">
+				{% wagtail_custom_menu as menu %}
+					{% for article in menu %}
+						<a class="dropdown-item" href="{{ article.url }}">{{ article.title }}</a>
+					{% endfor %}
+				</div>
+			</li>
+
 			<li class="nav-item">
 				<a class="nav-link" href="https://github.com/Brachamul/fichier-jdem/issues" target="_blank">Signaler un bug</a>
 			</li>
@@ -59,3 +71,6 @@
 	</div>
 </nav>
 <br/>
+
+<style>
+</style>
