@@ -3,16 +3,9 @@ from django.contrib import admin
 from .models import *
 
 
-class NotesInline(admin.TabularInline):
-	model = Note
-	list_per_page = 1000
-	fk_name = 'target'
-	extra = 0
-
 class AdherentAdmin(admin.ModelAdmin):
 	model = Adherent
-	inlines = [NotesInline, ]
-	list_per_page = 1000
+	list_per_page = 250
 	list_display = ("num_adherent", "nom", "prenom", "federation", "email", "a_jour_de_cotisation", "fichier")
 	readonly_fields = (
 		"num_adherent", "genre", "nom", "prenom", "federation", "date_premiere_adhesion", "date_derniere_cotisation",
@@ -25,8 +18,8 @@ admin.site.register(Adherent, AdherentAdmin)
 
 class NoteAdmin(admin.ModelAdmin):
 	model = Note
-	list_per_page = 2000
-	list_display = ("target", "author", "text", "date")
+	list_per_page = 250
+	list_display = ("num_adherent", "author", "text", "date")
 
 admin.site.register(Note, NoteAdmin)
 
@@ -39,7 +32,7 @@ class ReadersInline(admin.TabularInline):
 class DroitsAdmin(admin.ModelAdmin):
 	model = Droits
 	inlines = [ReadersInline, ]
-	list_per_page = 1000
+	list_per_page = 250
 
 admin.site.register(Droits, DroitsAdmin)
 
@@ -47,7 +40,7 @@ admin.site.register(Droits, DroitsAdmin)
 
 class CnilAdmin(admin.ModelAdmin):
 	model = Cnil
-	list_per_page = 1000
+	list_per_page = 250
 
 admin.site.register(Cnil, CnilAdmin)
 

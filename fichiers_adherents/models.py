@@ -183,6 +183,9 @@ class Adherent(models.Model):
 			naissance = naissance.date()
 		return naissance < dt.datetime.now().date() - dt.timedelta(days=12053.25) # 33 ans
 
+	def notes(self):
+		return Note.objects.filter(num_adherent=self.num_adherent)
+
 	# Meta
 
 	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
@@ -218,8 +221,7 @@ def adherents_actuels() :
 
 class Note(models.Model):
 
-	# todo : make that no longer tied to an adhérent but to a numéro adhérent
-	target = models.ForeignKey(Adherent, related_name='notes')
+	num_adherent = models.IntegerField(verbose_name="Numéro d'adhérent")
 	author = models.ForeignKey(User)
 	text = models.CharField(max_length=1024)
 	date = models.DateTimeField(auto_now_add=True)

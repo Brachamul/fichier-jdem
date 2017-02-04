@@ -3,8 +3,6 @@
 
 {% block content %}{{ block.super }}
 
-<div class="col-sm-12">
-
 <article>
 
 {% if page_title %}<h1>{{ page_title }} ({{ object_list|length }}) :</h1>{% endif %}
@@ -81,8 +79,6 @@
 {% endif %}
 
 </article>
-
-</div> <!--columns-->
 
 {% endblock content %}
 

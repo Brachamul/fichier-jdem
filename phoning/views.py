@@ -96,7 +96,7 @@ def coordonnees(request, operation_id):
 			else :
 				operation.targets_with_wrong_number.remove(adherent)
 			if request.POST.get('note') :
-				new_note = Note(target=adherent, author=request.user, text=request.POST.get('note'))
+				new_note = Note(num_adherent=adherent.num_adherent, author=request.user, text=request.POST.get('note'))
 				new_note.save()
 		else:
 			time_threshold = datetime.now() - timedelta(minutes=20) # 20 minutes ago

@@ -5,12 +5,11 @@
 
 {% block content %}{{ block.super }}
 
-<div class="col-sm-12">
 <article>
 	<h1>{{ adherent.nom }} {{ adherent.prenom }}</h1>
 	<hr/>
 	Adhérent numéro : <strong>{{ adherent.num_adherent }}</strong><br/>
-	Date de naissance : <strong>{{ adherent.date_de_naissance}} ({{ adherent.date_de_naissance|timesince }})</strong><br/>
+	Date de naissance : <strong>{{ adherent.date_de_naissance}}</strong> ({{ adherent.date_de_naissance|timesince }})<br/>
 	Genre : <strong>{{ adherent.genre }}</strong><br/>
 	<hr/>
 	Profession :<br/>
@@ -30,7 +29,7 @@
 	{% endif %}
 	<hr/>
 	Première côtisation :
-	<strong>{{ adherent.date_premiere_adhesion }}</strong><br/>
+	<strong>{{ adherent.date_premiere_adhesion }}</strong> ({{ adherent.date_premiere_adhesion|timesince }})<br/>
 	Dernière côtisation :
 	<strong>{{ adherent.date_derniere_cotisation }}</strong><br/>
 	<hr/>
@@ -57,8 +56,36 @@
 		</strong>
 	{% endif %}
 
+	<hr/>
+	<h2>Notes :</h2>
+
+	<p>
+	<form method="POST" action="" enctype="multipart/form-data">
+		<div class="form-group">
+			{% csrf_token %}
+			<textarea name="note" class="form-control" maxlength="1024" rows="3"
+			placeholder="Notes..."></textarea>
+		</div>
+		<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
+		<div class="form-group">
+			<button type="submit" class="btn btn-sm btn-primary">
+				<i class="fa fa-check"></i>
+				Enregistrer
+			</button>
+		</div>
+	</form>
+	</p>
+
+	{% if adherent.notes %}
+		{% for note in adherent.notes.all|dictsortreversed:"date" %}
+			<p>
+				<small><em style="color: #666">{{ note.date|date:"Y-m-d à H:i" }}, par {{ note.author }}</em></small><br/>
+				{{ note.text }}
+			</p>
+		{% endfor %}
+	{% endif %}
+
 </article>
-</div>
 
 {% endblock content %}
 

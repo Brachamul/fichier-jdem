@@ -236,10 +236,20 @@ def VueAdherent(request, num_adherent):
 
 	adherent = get_object_or_404(Adherent, num_adherent=num_adherent, fichier=FichierAdherents.objects.latest())
 	if adherent in adherents_visibles(request) :
+
+		if request.method == "POST" :
+			num_adherent = request.POST.get('num_adherent')
+			# Check if call was successful or not
+			if request.POST.get('note') :
+				new_note = Note(num_adherent=num_adherent, author=request.user, text=request.POST.get('note'))
+				new_note.save()
+				messages.success(request, "Votre note a été enregistrée.")
+
 		return render(request, 'fichiers_adherents/adherent.html', {
 			'adherent': adherent,
 			'page_title': adherent.nom_courant(),
 			})
+
 	else :
 		messages.error(request, "Vous n'êtes pas autorisé à consulter ce profil.")
 		return redirect('fichier')

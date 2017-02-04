@@ -6,7 +6,7 @@
 <article>
 <form action="" method="post" enctype="multipart/form-data">
 	<h1>Authentification</h1>
-	<hr>
+	<hr/>
 	{% csrf_token %}
 	{% bootstrap_form form %}
 	<input type="hidden" name="next" value="{{ next }}" />
