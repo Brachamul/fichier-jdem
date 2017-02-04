@@ -29,6 +29,41 @@
 
 {% block footer %}
 
+
+<style>
+
+	body {
+		background-color: hsl( 202.6, 100%, 25% ) !important;
+	}
+
+	nav { box-shadow: 0 0 2rem -0rem rgba(0,0,0,.5); background-color: rgba(255,255,255,0.05);}
+
+	article {
+		max-width: 48rem;
+		margin: 1rem auto;
+		padding: 0 3rem 2rem;
+		border: 1px solid #eee;
+		background-image: url('https://d1wli5mq9yq9mw.cloudfront.net/static/images/bg_main.gif');
+		box-shadow: 0 0 2rem -0rem rgba(0,0,0,.5);
+	}
+
+	article.full-width {
+		max-width: none;
+		margin-top: -.5rem;
+	}
+
+	@media only screen and (max-width: 768px) {
+		html { font-size: 14px; }
+		article {
+			margin-top: 0;
+			padding: 0 2rem 2rem;
+		}		
+	}
+
+	article h1 { margin: 2rem 0; }
+	
+</style>
+
 {% endblock footer %}
 
 

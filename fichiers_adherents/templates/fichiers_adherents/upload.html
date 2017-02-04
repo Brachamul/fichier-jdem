@@ -11,10 +11,10 @@
 
 {% block content %}{{ block.super }}
 
-<div class="col-sm-12">
+<article>
 
 	<h1>Téléverser un fichier adhérents</h1>
-	<br>
+	<hr/>
 	<p>Attention, il est nécessaire que ce fichier soit au format <strong>CSV</strong>, délimité par des <strong>points-virgule</strong>.</p>
 	<p>C'est indispensable, parce que de nombreux champs d'adresses contiennent des virgules : "25, rue des platanes"</p>
 	<p>Vous pouvez enregistrer au format CSV depuis Excel.</p>
@@ -29,7 +29,7 @@
 		<input type="submit" name="submit" value="Téléverser" class="btn btn-primary">
 	</form>
 
-</div>
+</article>
 
 {% endblock content %}
 

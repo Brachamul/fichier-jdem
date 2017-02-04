@@ -5,6 +5,8 @@
 
 <div class="col-sm-12">
 
+<article>
+
 {% if page_title %}<h1>{{ page_title }} ({{ object_list|length }}) :</h1>{% endif %}
 
 <div><!-- Actions -->
@@ -78,6 +80,8 @@
 {% if user.is_staff and admin_url %}
 <p><a class="btn btn-secondary" href="{{ admin_url }}"><i class="fa fa-gears"></i> Administrer</a></p>
 {% endif %}
+
+</article>
 
 </div> <!--columns-->
 

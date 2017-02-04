@@ -6,7 +6,7 @@
 {% block content %}{{ block.super }}
 
 <div class="col-sm-12">
-<div style="max-width: 480px; margin: auto;">
+<article>
 	<h1>{{ adherent.nom }} {{ adherent.prenom }}</h1>
 	<hr/>
 	Adhérent numéro : <strong>{{ adherent.num_adherent }}</strong><br/>
@@ -57,7 +57,7 @@
 		</strong>
 	{% endif %}
 
-</div>
+</article>
 </div>
 
 {% endblock content %}

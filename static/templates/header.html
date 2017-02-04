@@ -5,7 +5,7 @@
 		<a class="navbar-brand pull-left" href="/">
 			<img src="/static/Purchase Order-104.png" height="30"
 			style="display: inline-block; margin-right: .25em; position: relative; top: -.1em;"/>
-			<strong>Fiji</strong> <small>- Le fichier JDem <sup>BETA</sup></small>
+			<strong>Fiji</strong> <small>- Le fichier JDem</small>
 		</a>
 		<button class="navbar-toggler hidden-sm-up" type="button"
 		data-toggle="collapse" data-target="#main-nav" aria-controls="main-nav"
@@ -13,60 +13,65 @@
 			&#9776;
 		</button>
 	</div>
-	{% if user.is_authenticated %}
+
 	<div class="collapse navbar-toggleable-xs" id="main-nav">
 		<ul class="nav navbar-nav">
-			<li class="nav-item active">
-				{% if not user.is_authenticated %}
-				<a class="nav-link" href="{% url 'login' %}">Connexion</a>
+
+			{% if user.is_authenticated %}
+
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'phoning_operations' %}">Phoning</a>
+				</li>
+	
+				{% if user.is_superuser %}
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Fichier</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" href="{% url 'fichier__adherents' %}">Liste des adhérents</a>
+						<a class="dropdown-item" href="{% url 'fichier__droits' %}">Gestion des droits</a>
+						<a class="dropdown-item" href="{% url 'televersement_du_fichier_adhérent' %}">Téléverser un fichier</a>
+						<a class="dropdown-item" href="{% url 'fichier__query_checker' %}">Testeur de requêtes</a>
+					</div>
+				</li>
+				{% elif user.droits_set.all %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'fichier__adherents' %}">Fichier</a>
+				</li>
 				{% endif %}
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href="{% url 'phoning_operations' %}">Phoning</a>
-			</li>
+	
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Guide</a>
+					<div class="dropdown-menu">
+					{% wagtail_custom_menu as menu %}
+						{% for article in menu %}
+							<a class="dropdown-item" href="{{ article.url }}">{{ article.title }}</a>
+						{% endfor %}
+					</div>
+				</li>
+	
+				<li class="nav-item">
+					<a class="nav-link" href="https://github.com/Brachamul/fichier-jdem/issues" target="_blank">Signaler un bug</a>
+				</li>
+	
+				{% if user.is_staff %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+				</li>
+				{% endif %}
+	
+				
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'logout' %}">Déconnexion</a>
+				</li>
 
-			{% if user.is_superuser %}
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Fichier</a>
-				<div class="dropdown-menu">
-					<a class="dropdown-item" href="{% url 'fichier__adherents' %}">Liste des adhérents</a>
-					<a class="dropdown-item" href="{% url 'fichier__droits' %}">Gestion des droits</a>
-					<a class="dropdown-item" href="{% url 'televersement_du_fichier_adhérent' %}">Téléverser un fichier</a>
-					<a class="dropdown-item" href="{% url 'fichier__query_checker' %}">Testeur de requêtes</a>
-				</div>
-			</li>
-			{% elif user.droits_set.all %}
-			<li class="nav-item">
-				<a class="nav-link" href="{% url 'fichier__adherents' %}">Fichier</a>
-			</li>
+			{% else %}
+	
+				<li class="nav-item active">
+					<a class="nav-link" href="{% url 'auth_network' %}">Connexion</a>
+				</li>
+
 			{% endif %}
 
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Guide</a>
-				<div class="dropdown-menu">
-				{% wagtail_custom_menu as menu %}
-					{% for article in menu %}
-						<a class="dropdown-item" href="{{ article.url }}">{{ article.title }}</a>
-					{% endfor %}
-				</div>
-			</li>
-
-			<li class="nav-item">
-				<a class="nav-link" href="https://github.com/Brachamul/fichier-jdem/issues" target="_blank">Signaler un bug</a>
-			</li>
-
-			{% if user.is_staff %}
-			<li class="nav-item">
-				<a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
-			</li>
-			{% endif %}
-
-			
-			<li class="nav-item">
-				<a class="nav-link" href="{% url 'logout' %}">Déconnexion</a>
-			</li>
-
-		{% endif %}
 		</ul>
 	</div>
 </nav>
