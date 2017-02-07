@@ -49,6 +49,7 @@
 	{% endif %}
 	{% if adherent.mandats or adherent.commune or adherent.canton %}
 		<hr/>
+		Mandat(s) :<br/>
 		<strong>
 		{{ adherent.mandats }}<br/>
 		{{ adherent.commune }}<br/>
@@ -60,28 +61,12 @@
 	<h2>Notes :</h2>
 
 	<p>
-	<form method="POST" action="" enctype="multipart/form-data">
-		<div class="form-group">
-			{% csrf_token %}
-			<textarea name="note" class="form-control" maxlength="1024" rows="3"
-			placeholder="Notes..."></textarea>
-		</div>
-		<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
-		<div class="form-group">
-			<button type="submit" class="btn btn-sm btn-primary">
-				<i class="fa fa-check"></i>
-				Enregistrer
-			</button>
-		</div>
-	</form>
+	{% include 'fichiers_adherents/modules/formulaire_note.html' %}
 	</p>
 
 	{% if adherent.notes %}
 		{% for note in adherent.notes.all|dictsortreversed:"date" %}
-			<p>
-				<small><em style="color: #666">{{ note.date|date:"Y-m-d à H:i" }}, par {{ note.author }}</em></small><br/>
-				{{ note.text }}
-			</p>
+			{% include 'fichiers_adherents/modules/affichage_note.html' %}
 		{% endfor %}
 	{% endif %}
 

@@ -78,10 +78,7 @@
 	<h4>Notes :</h4>
 	{% if adherent.notes %}
 		{% for note in adherent.notes.all|dictsortreversed:"date" %}
-			<p>
-				<small><em style="color: #666">{{ note.date|date:"Y-m-d à H:i" }}, par {{ note.author }}</em></small><br/>
-				{{ note.text }}
-			</p>
+			{% include 'fichiers_adherents/modules/affichage_note.html' %}
 		{% endfor %}
 	{% endif %}
 
