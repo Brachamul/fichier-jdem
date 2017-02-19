@@ -24,44 +24,17 @@
 <hr/>
 
 
-{% for object in object_list %}
+{% for droit in object_list %}
 <div>
-
-	{% if url_by_id or url_by_slug %}
-
-	<a href="
-		{% if url_prefix %}{{ url_prefix }}{% endif %}
-		{% if url_by_id %}{{ object.pk }}{% endif %}
-		{% if url_by_slug and object.slug %}{{ object.slug }}{% endif %}
-		">
-
-	{% endif %}
 	
-		{% if object.title %}<h2>{{ object.title }}</h2>{% endif %}
-		
-		{% if object.name %}<h4>{{ object.name }}</h4>{% endif %}
+	<p>
+		<strong>{{ droit.name }}</strong>
+		{% for user in droit.readers.all %}
+		<span> - {{ user }}</span> 
+		{% endfor %}
 
-		{% if object.username %}<h4>{{ object.username }}</h4>{% endif %}
+	</p>
 
-		{% if object.prenom or object.nom %}<h4>{{ object.nom }} {{ object.prenom }}</h4>{% endif %}
-	
-	{% if url_by_id or url_by_slug %}</a>{% endif %}
-
-	{% if object.text %}<p>{{ object.text }}</p>{% endif %}
-
-	{% if object.created or object.created_by %}
-
-		<p style="font-size: .8em; color: #666">
-		{% if object.created and object.created_by %}
-			{{ object.created|date:"Y-m-d à H:i" }}, par {{ object.created_by }}
-		{% elif object.created %}
-			{{ object.created|date:"Y-m-d à H:i" }}
-		{% elif object.created_by %}
-			par {{ object.created_by }}
-		{% endif %}
-		</p>
-
-	{% endif %}
 
 </div>
 <hr/>
@@ -71,7 +44,7 @@
 
 {% if not object_list %}
 
-<p>Cette liste est vide.</p>
+<p>Les droits n'ont pas encore été chargés !</p>
 
 {% endif %}
 
