@@ -49,8 +49,13 @@
 					</div>
 				</li>
 	
-				<li class="nav-item">
-					<a class="nav-link" href="https://github.com/Brachamul/fichier-jdem/issues" target="_blank">Signaler un bug</a>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Aide</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" target="_blank" href="https://www.facebook.com/groups/1646357402326516/">Demander de l'aide sur le groupe Facebook dédié</a>
+						<a class="dropdown-item" target="_blank" href="https://github.com/Brachamul/fichier-jdem/issues" target="_blank">Signaler un bug</a>
+					</div>
+
 				</li>
 	
 				{% if user.is_staff %}
