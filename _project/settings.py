@@ -173,19 +173,17 @@ WAGTAIL_SITE_NAME = "du guide des responsables de fédérations"
 
 #TODO : add some logging
 
-'''
+
+# EMAILING
+
 INSTALLED_APPS += ['anymail',]
 
-DEFAULT_FROM_EMAIL = "Fichier JDem <fichier@mailgun.mydomain.fr>"
+DEFAULT_FROM_EMAIL = "Fiji - le fichier JDem <fichier@jdem.fr>"
 EMAIL_SHOULD_FAIL_SILENTLY = True 
 
 EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"  # or sendgrid.SendGridBackend, or...
 
-ANYMAIL = {
-	"MAILGUN_API_KEY": "_",
-	"MAILGUN_SENDER_DOMAIN": "mailgun.jdem.fr",
-}
-'''
+# Note that the "ANYMAIL" variable including API key and sender domain must be set in local settings
 
 
 ##########################

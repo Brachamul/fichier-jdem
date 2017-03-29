@@ -3,6 +3,11 @@ AUTH_NETWORK_URL = 'http://localhost:8007/'
 AUTH_NETWORK_KEY = 'PLEASE_SET_NETWORK_AUTH_KEY'
 AUTH_NETWORK_SECRET = 'PLEASE_SET_NETWORK_AUTH_SECRET'
 
+ANYMAIL = {
+	"MAILGUN_API_KEY": "key-***",
+	"MAILGUN_SENDER_DOMAIN": "mailgun.jdem.fr",
+}
+
 # STANDARD SETTINGS
 SITE_URL = 'localhost' # use http:// in production
 ALLOWED_HOSTS = [SITE_URL, ]
