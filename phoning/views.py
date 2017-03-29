@@ -27,7 +27,8 @@ def getRandomInstance(QuerySet, filter=False):
 	return QuerySet[random_idx]
 
 # Redirects root URL to list of operations
-def phoning(requests):
+def phoning(request):
+	# TODO : maybe redirect back home and say nothing in progress
 	return redirect('phoning_operations')
 
 
@@ -40,13 +41,14 @@ class OperationsList(ListView):
 
 	def get_context_data(self, **kwargs):
 		context = super(OperationsList, self).get_context_data(**kwargs)
-		context['object_list'] = Operation.objects.filter(valid_until__gt=datetime.now())
+		context['object_list'] = authorized_phoning_operations(self.request.user)
 		context['page_title'] = 'Opérations en cours'
 		context['url_by_id'] = True
 		context['admin_url'] = reverse('admin:phoning_operation_changelist')
 		return context
 
-
+def authorized_phoning_operations(user):
+	return Operation.objects.filter(valid_until__gt=datetime.now(), authorized_users=user)
 
 @method_decorator(staff_member_required, name='dispatch')
 class OperationTargets(ListView):
