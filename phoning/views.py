@@ -118,6 +118,7 @@ def coordonnees(request, operation_id):
 				if operation_targets.count() < 1 : 
 					messages.success(request, "Tous les adhérents de cette opération ont déjà été contactés !")
 					return redirect('phoning')
+				operation_targets = Member.objects.filter(pk__in=operation_targets.values('num_adherent'))
 				member = getRandomInstance(operation_targets)
 			newRequest = UserRequest(user=request.user, operation=operation)
 			newRequest.save()
@@ -125,7 +126,7 @@ def coordonnees(request, operation_id):
 		return render(request, 'phoning/coordonnees.html', {
 			'member': member,
 			'adherent': member.derniere_occurence_fichier(),
-			'page_title': 'Opération ' + operation.name,
+			'page_title': operation.name,
 			'wrong_number': operation.targets_with_wrong_number.filter(pk=member.pk),
 			'call_successful': operation.targets_called_successfully.filter(pk=member.pk),
 			})
