@@ -16,15 +16,6 @@ admin.site.register(Adherent, AdherentAdmin)
 
 
 
-class NoteAdmin(admin.ModelAdmin):
-	model = Note
-	list_per_page = 250
-	list_display = ("num_adherent", "author", "text", "date")
-
-admin.site.register(Note, NoteAdmin)
-
-
-
 class ReadersInline(admin.TabularInline):
 	model = Reader
 	extra = 1

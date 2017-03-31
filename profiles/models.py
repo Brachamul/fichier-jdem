@@ -1,8 +1,10 @@
 from django.db import models
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from fichiers_adherents.models import FichierAdherents, Adherent, Cnil
+from fichiers_adherents.models import FichierAdherents, Adherent, Cnil, adherents_actuels
+
 
 
 class Member(models.Model):
@@ -26,5 +28,17 @@ class Member(models.Model):
 			adherents = Adherent.objects.all()
 		for adherent in adherents :
 			new_member, created = Member.objects.get_or_create(id=adherent.num_adherent)
+
+
+
+class Note(models.Model):
+
+	member = models.ForeignKey(Member)
+	author = models.ForeignKey(User)
+	text = models.CharField(max_length=1024)
+	date = models.DateTimeField(auto_now_add=True)
+	
+	def __str__(self): return self.text
+
 
 # https://codepen.io/codyhouse/pen/FdkEf

@@ -220,17 +220,6 @@ def adherents_actuels() :
 
 
 
-class Note(models.Model):
-
-	num_adherent = models.IntegerField(verbose_name="Numéro d'adhérent")
-	author = models.ForeignKey(User)
-	text = models.CharField(max_length=1024)
-	date = models.DateTimeField(auto_now_add=True)
-	
-	def __str__(self): return self.text
-
-
-
 class WrongNumber(models.Model):
 
 	# todo : fix that

@@ -76,9 +76,9 @@
 
 	<hr/>
 	<h4>Notes :</h4>
-	{% if adherent.notes %}
-		{% for note in adherent.notes.all|dictsortreversed:"date" %}
-			{% include 'fichiers_adherents/modules/affichage_note.html' %}
+	{% if member.notes %}
+		{% for note in member.notes.all|dictsortreversed:"date" %}
+			{% include 'profiles/modules/affichage_note.html' %}
 		{% endfor %}
 	{% endif %}
 

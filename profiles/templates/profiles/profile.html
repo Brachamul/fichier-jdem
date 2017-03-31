@@ -61,12 +61,13 @@
 	<h2>Notes :</h2>
 
 	<p>
-	{% include 'fichiers_adherents/modules/formulaire_note.html' %}
+	{% include 'profiles/modules/formulaire_note.html' %}
 	</p>
 
-	{% if adherent.notes %}
-		{% for note in adherent.notes.all|dictsortreversed:"date" %}
-			{% include 'fichiers_adherents/modules/affichage_note.html' %}
+	<h4>Notes :</h4>
+	{% if member.notes %}
+		{% for note in member.notes.all|dictsortreversed:"date" %}
+			{% include 'profiles/modules/affichage_note.html' %}
 		{% endfor %}
 	{% endif %}
 
