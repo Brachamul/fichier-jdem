@@ -7,7 +7,7 @@
 
 {% if page_title %}<h1>{{ page_title }} :</h1>{% endif %}
 
-<p><a class="btn btn-default btn-block" href=""><i class="fa fa-refresh"></i> Charger un nouvel adhérent</a></p>
+<p><a class="btn btn-secondary btn-block" href=""><i class="fa fa-refresh"></i> Charger un nouvel adhérent</a></p>
 
 {% if adherent %}
 
@@ -62,7 +62,7 @@
 		</div>
 		<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
 		<div class="form-group">
-			<button type="submit" class="btn btn-default">
+			<button type="submit" class="btn btn-secondary">
 				<i class="fa fa-check"></i>
 				Enregistrer
 			</button>
@@ -71,7 +71,7 @@
 	</p>
 
 	{% if user.is_staff and admin_url %}	
-		<a class="btn btn-default" href="{% url 'admin:fichiers_adherents_adherent_change' adherent.pk %}"><i class="fa fa-gears"></i> Administrer</a>	
+		<a class="btn btn-secondary" href="{% url 'admin:fichiers_adherents_adherent_change' adherent.pk %}"><i class="fa fa-gears"></i> Administrer</a>	
 	{% endif %}
 
 	<hr/>
