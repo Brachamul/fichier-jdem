@@ -14,7 +14,6 @@ import datetime as dt
 
 
 
-
 class FichierAdherents(models.Model):
 
 	date_d_import = models.DateTimeField(auto_now_add=True)
@@ -202,7 +201,6 @@ class Adherent(models.Model):
 
 
 
-
 def adherents_actuels() :
 	
 	''' Renvoie la liste des adhérents actuels, c'est à dire
@@ -261,6 +259,7 @@ class Droits(models.Model):
 	def __str__(self): return self.name
 
 
+
 class Reader(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	droits = models.ForeignKey(Droits, on_delete=models.CASCADE)
@@ -268,6 +267,7 @@ class Reader(models.Model):
 	class Meta :
 		verbose_name = "Lecteur"
 		def __str__(self): return str(self.user)
+
 
 
 class Cnil(models.Model):

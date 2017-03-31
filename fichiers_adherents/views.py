@@ -26,6 +26,8 @@ from .models import *
 from .forms import *
 from . import emails
 
+from profiles.models import Member
+
 '''
 @login_required
 def dashboard(request):
@@ -75,6 +77,7 @@ def televersement(request):
 					nouveau_fichier.save()
 					try :
 						importation(nouveau_fichier) # Importe les données du fichier dans la base "Adherent"
+						Member.initiate(fichier=nouveau_fichier)
 						emails.prevenir_du_chargement_dun_nouveau_fichier()
 					except Exception as e:
 						# UNEXPECTED ERROR
