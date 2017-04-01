@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, render, render_to_response, redi
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
-from fichiers_adherents.models import Adherent, Note, WrongNumber, adherents_actuels
+from fichiers_adherents.models import FichierAdherents, Adherent, Note, WrongNumber, adherents_actuels
 
 from .models import *
 from .forms import *
