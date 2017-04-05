@@ -2,6 +2,8 @@ from django.db import models
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from fichiers_adherents.models import FichierAdherents, Adherent, Cnil, adherents_actuels
 
@@ -28,6 +30,11 @@ class Member(models.Model):
 			adherents = Adherent.objects.all()
 		for adherent in adherents :
 			new_member, created = Member.objects.get_or_create(id=adherent.num_adherent)
+
+
+@receiver(post_save, sender=Adherent)
+def initiate_member(sender, instance, created, **kwargs):
+	new_member, created = Member.objects.get_or_create(id=instance.num_adherent)
 
 
 

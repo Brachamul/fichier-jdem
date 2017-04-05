@@ -31,8 +31,8 @@ INSTALLED_APPS = [
 	'django.contrib.staticfiles',
 	'bootstrap3', # django-bootstrap3
 	'fichiers_adherents',
-	'phoning',
 	'profiles',
+	'phoning',
 ]
 
 # Make AutoSlugs use unicode characters
