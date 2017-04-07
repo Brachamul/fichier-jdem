@@ -4,10 +4,6 @@ from .models import *
 
 
 
-
-
-
-
 class NoteAdmin(admin.ModelAdmin):
 	model = Note
 	list_per_page = 250
@@ -24,6 +20,7 @@ class NotesInline(admin.TabularInline):
 class MemberAdmin(admin.ModelAdmin):
 	model = Member
 	readonly_fields = ("id",)
+	list_display = ("id", "__unicode__")
 	inlines = [NotesInline, ]
 
 admin.site.register(Member, MemberAdmin)

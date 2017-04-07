@@ -19,7 +19,7 @@ class Operation(models.Model):
 	created_by = models.ForeignKey(User)
 	created = models.DateTimeField(auto_now_add=True)
 
-	def __str__(self):
+	def __unicode__(self):
 		return self.name
 
 class UserRequest(models.Model):

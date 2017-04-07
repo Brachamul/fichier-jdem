@@ -19,11 +19,12 @@ class Member(models.Model):
 	def derniere_occurence_fichier(self):
 		return Adherent.objects.get(num_adherent=self.id, fichier=FichierAdherents.objects.latest()) # Todo : what if not in latest fichier ?
 
-	def __str__(self):
-		return str(self.id)
+	def __unicode__(self):
+		return str(self.derniere_occurence_fichier())
 
 	def initiate(fichier=False):
-		''' Generate, for all fichiers or a single one, members for each adherent '''
+		''' Generate, for all fichiers or a single one, members for each adherent
+		this is used when rebuilding the DB '''
 		if fichier :
 			adherents = Adherent.objects.filter(fichier=fichier)
 		else :
@@ -45,7 +46,7 @@ class Note(models.Model):
 	text = models.CharField(max_length=1024)
 	date = models.DateTimeField(auto_now_add=True)
 	
-	def __str__(self): return self.text
+	def __unicode__(self): return self.text
 
 
 # https://codepen.io/codyhouse/pen/FdkEf

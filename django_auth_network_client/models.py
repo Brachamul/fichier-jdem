@@ -20,7 +20,7 @@ class NetworkUser(models.Model):
 
 	# TODO : handle cascading when a user is deleted on Centrifuge
 
-	def __str__(self):
+	def __unicode__(self):
 		return str(self.user)
 
 	def update_user_details(self, user_details):
