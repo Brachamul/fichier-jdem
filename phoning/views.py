@@ -129,3 +129,14 @@ def coordonnees(request, operation_id):
 			'wrong_number': operation.targets_with_wrong_number.filter(pk=member.pk),
 			'call_successful': operation.targets_called_successfully.filter(pk=member.pk),
 			})
+
+@staff_member_required
+def test(request):
+	member = getRandomInstance(Member.objects.all())
+	return render(request, 'phoning/coordonnees.html', {
+		'member': member,
+		'adherent': member.derniere_occurence_fichier(),
+		'page_title': 'Opération Test',
+		'wrong_number': False,
+		'call_successful': False,
+		})

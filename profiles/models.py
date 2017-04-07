@@ -17,7 +17,9 @@ class Member(models.Model):
 		return Adherent.objects.filter(num_adherent=self.id)
 
 	def derniere_occurence_fichier(self):
-		return Adherent.objects.get(num_adherent=self.id, fichier=FichierAdherents.objects.latest()) # Todo : what if not in latest fichier ?
+		adherents = Adherent.objects.filter(num_adherent=self.id)
+		fichier = FichierAdherents.objects.filter(adherent__in=adherents)
+		return Adherent.objects.get(num_adherent=self.id, fichier=fichier.latest())
 
 	def __str__(self):
 		return str(self.derniere_occurence_fichier())
@@ -33,6 +35,7 @@ class Member(models.Model):
 			new_member, created = Member.objects.get_or_create(id=adherent.num_adherent)
 
 	def phoneless(self):
+		''' Returns 'True' if the adherent has no phone number '''
 		return self.derniere_occurence_fichier().phoneless()
 
 
