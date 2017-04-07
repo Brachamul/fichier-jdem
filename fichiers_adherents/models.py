@@ -187,6 +187,13 @@ class Adherent(models.Model):
 	def notes(self):
 		return Note.objects.filter(num_adherent=self.num_adherent)
 
+	def phoneless(self):
+		if self.tel_portable or self.tel_bureau or self.tel_domicile :
+			return False
+		else :
+			return True
+
+
 	# Meta
 
 	def __unicode__(self): return '{} {}'.format(self.prenom, self.nom)

@@ -32,6 +32,9 @@ class Member(models.Model):
 		for adherent in adherents :
 			new_member, created = Member.objects.get_or_create(id=adherent.num_adherent)
 
+	def phoneless(self):
+		return self.derniere_occurence_fichier().phoneless()
+
 
 @receiver(post_save, sender=Adherent)
 def initiate_member(sender, instance, created, **kwargs):
