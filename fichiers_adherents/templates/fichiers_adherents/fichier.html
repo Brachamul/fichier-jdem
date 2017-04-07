@@ -64,10 +64,10 @@
 			</td>
 			<td class="center">{{ adherent.federation }}</td>
 			<td>{{ adherent.ville }}</td>
-			<td><a href="{% url 'adherent' adherent.num_adherent %}">
+			<td><a href="{% url 'profil' adherent.num_adherent %}">
 				{% if adherent.est_recent %}<span data-toggle="tooltip" title="Cet adhérent·e est nouveau·elle !">★<span>{% endif %}
 				{{ adherent.nom }}</a></td>
-			<td><a href="{% url 'adherent' adherent.num_adherent %}">{{ adherent.prenom }}</a></td>
+			<td><a href="{% url 'profil' adherent.num_adherent %}">{{ adherent.prenom }}</a></td>
 			<td>{{ adherent.date_de_naissance|timesince }}</td>
 			<td>
 				{% if adherent.tel_portable %}<a href="tel:{{ adherent.tel_portable }}">{{ adherent.tel_portable }}</a>{% endif %}

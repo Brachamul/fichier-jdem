@@ -10,6 +10,7 @@ urlpatterns = [
 	url(r'^arriere-boutique/', admin.site.urls, name='admin'),
 	url(r'^fichier/', include('fichiers_adherents.urls')),
 	url(r'^phoning/', include('phoning.urls')),
+	url(r'^profils/', include('profiles.urls')),
 #	url(r'^$', RedirectView.as_view(url="/phoning", permanent=False)),
 ]
 

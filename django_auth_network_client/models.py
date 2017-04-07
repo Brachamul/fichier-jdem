@@ -2,7 +2,6 @@ import os, requests, json
 import uuid
 from django.db import models, IntegrityError
 from django.conf import settings
-from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from django.contrib.auth.models import User

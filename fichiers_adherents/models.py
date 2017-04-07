@@ -7,11 +7,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 from django.db.models import Max, F
-from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 import datetime as dt
-
 
 
 
@@ -202,7 +200,6 @@ class Adherent(models.Model):
 
 
 
-
 def adherents_actuels() :
 	
 	''' Renvoie la liste des adhérents actuels, c'est à dire
@@ -219,17 +216,6 @@ def adherents_actuels() :
 			a_jour_de_cotisation=True,
 			trop_vieux=False,
 			)
-
-
-
-class Note(models.Model):
-
-	num_adherent = models.IntegerField(verbose_name="Numéro d'adhérent")
-	author = models.ForeignKey(User)
-	text = models.CharField(max_length=1024)
-	date = models.DateTimeField(auto_now_add=True)
-	
-	def __str__(self): return self.text
 
 
 
@@ -261,6 +247,7 @@ class Droits(models.Model):
 	def __str__(self): return self.name
 
 
+
 class Reader(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	droits = models.ForeignKey(Droits, on_delete=models.CASCADE)
@@ -268,6 +255,7 @@ class Reader(models.Model):
 	class Meta :
 		verbose_name = "Lecteur"
 		def __str__(self): return str(self.user)
+
 
 
 class Cnil(models.Model):

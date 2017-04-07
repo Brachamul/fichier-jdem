@@ -12,7 +12,8 @@ from django.shortcuts import get_object_or_404, render, render_to_response, redi
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
-from fichiers_adherents.models import FichierAdherents, Adherent, Note, WrongNumber, adherents_actuels
+from fichiers_adherents.models import Adherent, WrongNumber, adherents_actuels
+from profiles.models import Note
 
 from .models import *
 from .forms import *
@@ -42,7 +43,7 @@ class OperationsList(ListView):
 	def get_context_data(self, **kwargs):
 		context = super(OperationsList, self).get_context_data(**kwargs)
 		context['object_list'] = authorized_phoning_operations(self.request.user)
-		context['page_title'] = 'Opérations en cours'
+		context['page_title'] = 'Phonings en cours'
 		context['url_by_id'] = True
 		context['admin_url'] = reverse('admin:phoning_operation_changelist')
 		return context
@@ -84,22 +85,21 @@ def coordonnees(request, operation_id):
 	else :
 		if request.method == "POST" :
 			num_adherent = request.POST.get('num_adherent')
-			fichier = FichierAdherents.objects.latest()
-			adherent = Adherent.objects.get(num_adherent=num_adherent, fichier=fichier)
+			member = Member.objects.get(num_adherent=num_adherent)
 			# Check if call was successful or not
 			if request.POST.get('call_successful') :
-				operation.targets_called_successfully.add(adherent)
+				operation.targets_called_successfully.add(member)
 			else :
-				operation.targets_called_successfully.remove(adherent)
+				operation.targets_called_successfully.remove(member)
 			# Check if number was wront or not
 			if request.POST.get('wrong_number') :
-				operation.targets_with_wrong_number.add(adherent)
-				new_wrong_number = WrongNumber(adherent=adherent, reported_by=request.user)
+				operation.targets_with_wrong_number.add(member)
+				new_wrong_number = WrongNumber(member=member, reported_by=request.user)
 				new_wrong_number.save()
 			else :
-				operation.targets_with_wrong_number.remove(adherent)
+				operation.targets_with_wrong_number.remove(member)
 			if request.POST.get('note') :
-				new_note = Note(num_adherent=adherent.num_adherent, author=request.user, text=request.POST.get('note'))
+				new_note = Note(member=member, author=request.user, text=request.POST.get('note'))
 				new_note.save()
 		else:
 			time_threshold = datetime.now() - timedelta(minutes=20) # 20 minutes ago
@@ -109,21 +109,23 @@ def coordonnees(request, operation_id):
 				return redirect('phoning')
 			else :
 				query = ast.literal_eval(operation.query) # admin-written query transformed into useable filter
-				adherents_called_successfully = operation.targets_called_successfully.all()
-				adherents_with_wrong_number = operation.targets_with_wrong_number.all()
+				members_called_successfully = operation.targets_called_successfully.all()
+				members_with_wrong_number = operation.targets_with_wrong_number.all()
 				operation_targets = adherents_actuels().filter(**query)\
-					.exclude(pk__in=adherents_called_successfully)\
-					.exclude(pk__in=adherents_with_wrong_number)
+					.exclude(num_adherent__in=members_called_successfully)\
+					.exclude(num_adherent__in=members_with_wrong_number)
 				if operation_targets.count() < 1 : 
 					messages.success(request, "Tous les adhérents de cette opération ont déjà été contactés !")
 					return redirect('phoning')
-				adherent = getRandomInstance(operation_targets)
+				operation_targets = Member.objects.filter(pk__in=operation_targets.values('num_adherent'))
+				member = getRandomInstance(operation_targets)
 			newRequest = UserRequest(user=request.user, operation=operation)
 			newRequest.save()
 	
 		return render(request, 'phoning/coordonnees.html', {
-			'adherent': adherent,
-			'page_title': 'Opération ' + operation.name,
-			'wrong_number': operation.targets_with_wrong_number.filter(pk=adherent.pk),
-			'call_successful': operation.targets_called_successfully.filter(pk=adherent.pk),
+			'member': member,
+			'adherent': member.derniere_occurence_fichier(),
+			'page_title': operation.name,
+			'wrong_number': operation.targets_with_wrong_number.filter(pk=member.pk),
+			'call_successful': operation.targets_called_successfully.filter(pk=member.pk),
 			})
