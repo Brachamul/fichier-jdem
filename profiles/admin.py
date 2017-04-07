@@ -20,7 +20,7 @@ class NotesInline(admin.TabularInline):
 class MemberAdmin(admin.ModelAdmin):
 	model = Member
 	readonly_fields = ("id",)
-	list_display = ("id", "__unicode__")
+	list_display = ("id", "__str__")
 	inlines = [NotesInline, ]
 
 admin.site.register(Member, MemberAdmin)

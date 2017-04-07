@@ -19,7 +19,7 @@ class Member(models.Model):
 	def derniere_occurence_fichier(self):
 		return Adherent.objects.get(num_adherent=self.id, fichier=FichierAdherents.objects.latest()) # Todo : what if not in latest fichier ?
 
-	def __unicode__(self):
+	def __str__(self):
 		return str(self.derniere_occurence_fichier())
 
 	def initiate(fichier=False):
@@ -49,7 +49,7 @@ class Note(models.Model):
 	text = models.CharField(max_length=1024)
 	date = models.DateTimeField(auto_now_add=True)
 	
-	def __unicode__(self): return self.text
+	def __str__(self): return self.text
 
 
 # https://codepen.io/codyhouse/pen/FdkEf

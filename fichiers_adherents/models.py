@@ -84,7 +84,7 @@ class FichierAdherents(models.Model):
 		else :
 			return (self.date - fichier_precedent.date).days
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Fichier du {}, importé le {} par {}".format(self.date, self.date_d_import.date(), self.importateur)
 
 	class Meta:
@@ -196,7 +196,7 @@ class Adherent(models.Model):
 
 	# Meta
 
-	def __unicode__(self): return '{} {}'.format(self.prenom, self.nom)
+	def __str__(self): return '{} {}'.format(self.prenom, self.nom)
 
 	class Meta:
 		ordering = ['nom']
@@ -233,7 +233,7 @@ class WrongNumber(models.Model):
 	reported_by = models.ForeignKey(User)
 	date = models.DateTimeField(auto_now_add=True)
 
-	def __unicode__(self): return self.adherent
+	def __str__(self): return self.adherent
 
 
 
@@ -251,7 +251,7 @@ class Droits(models.Model):
 		verbose_name = "droit d'accès".encode('utf-8')
 		verbose_name_plural = "droits d'accès".encode('utf-8')
 
-	def __unicode__(self): return self.name
+	def __str__(self): return self.name
 
 
 
@@ -261,7 +261,7 @@ class Reader(models.Model):
 	date = models.DateTimeField(auto_now=True)
 	class Meta :
 		verbose_name = "Lecteur"
-		def __unicode__(self): return str(self.user)
+		def __str__(self): return str(self.user)
 
 
 
@@ -273,4 +273,4 @@ class Cnil(models.Model):
 	class Meta :
 		verbose_name = "Déclaration CNIL"
 		verbose_name_plural = "Déclarations CNIL"
-	def __unicode__(self): return str(self.user)
+	def __str__(self): return str(self.user)
