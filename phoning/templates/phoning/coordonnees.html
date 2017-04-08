@@ -7,12 +7,12 @@
 
 {% if page_title %}<h1>{{ page_title }} :</h1>{% endif %}
 
-<p><a class="btn btn-secondary btn-block" href=""><i class="fa fa-refresh"></i> Charger un nouvel adhérent</a></p>
-
 {% if adherent %}
 
-	<p><strong>Prénom :</strong> 
-	{{ adherent.prenom }}</p>
+	<p><a class="btn btn-secondary btn-block" href=""><i class="fa fa-refresh"></i> Passer</a></p>
+
+	<p><strong>Nom :</strong> 
+	{{ adherent.nom_courant }}</p>
 	
 	<p><strong>Ville :</strong>
 	{{ adherent.ville }} ({{ adherent.federation }})<p>
@@ -57,13 +57,24 @@
 					Mauvais numéro :(
 				</label>
 			</div>
+
+			<!-- End-of-call buttons -->
+			<!-- TODO make better buttons yeah ?
+			<div class="col-xl-4">
+				<a class="btn btn-secondary btn-block" href=""><i class="fa fa-refresh"></i> Passer</a>
+			</div>
+			<div class="col-xl-4"></div>
+			<div class="col-xl-4"></div>
+			-->
+
+			<hr/>
 			<textarea name="note" class="form-control" maxlength="5000" rows="6"
 			placeholder="Notes..."></textarea>
 		</div>
 		<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
 		<div class="form-group">
 			<button type="submit" class="btn btn-secondary">
-				<i class="fa fa-check"></i>
+				<i class="fa fa-save"></i>
 				Enregistrer
 			</button>
 		</div>
@@ -74,9 +85,9 @@
 		<a class="btn btn-secondary" href="{% url 'admin:fichiers_adherents_adherent_change' adherent.pk %}"><i class="fa fa-gears"></i> Administrer</a>	
 	{% endif %}
 
-	<hr/>
-	<h4>Notes :</h4>
 	{% if member.notes %}
+		<hr/>
+		<h4>Notes :</h4>
 		{% for note in member.notes.all|dictsortreversed:"date" %}
 			{% include 'profiles/modules/affichage_note.html' %}
 		{% endfor %}

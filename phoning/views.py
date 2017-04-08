@@ -111,9 +111,11 @@ def coordonnees(request, operation_id):
 				query = ast.literal_eval(operation.query) # admin-written query transformed into useable filter
 				members_called_successfully = operation.targets_called_successfully.all()
 				members_with_wrong_number = operation.targets_with_wrong_number.all()
+				members_with_no_phone_number = Member.objects.filter(phoneless=True)
 				operation_targets = adherents_actuels().filter(**query)\
 					.exclude(num_adherent__in=members_called_successfully)\
-					.exclude(num_adherent__in=members_with_wrong_number)
+					.exclude(num_adherent__in=members_with_wrong_number)\
+					.exclude(num_adherent__in=members_with_no_phone_number)
 				if operation_targets.count() < 1 : 
 					messages.success(request, "Tous les adhérents de cette opération ont déjà été contactés !")
 					return redirect('phoning')

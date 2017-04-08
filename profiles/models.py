@@ -12,6 +12,7 @@ from fichiers_adherents.models import FichierAdherents, Adherent, Cnil, adherent
 class Member(models.Model):
 
 	id = models.IntegerField(primary_key=True)
+	phoneless = models.BooleanField(default=False)
 
 	def historique_adherent(self):
 		return Adherent.objects.filter(num_adherent=self.id)
@@ -34,15 +35,16 @@ class Member(models.Model):
 		for adherent in adherents :
 			new_member, created = Member.objects.get_or_create(id=adherent.num_adherent)
 
-	def phoneless(self):
+	def check_if_phoneless(self):
 		''' Returns 'True' if the adherent has no phone number '''
-		return self.derniere_occurence_fichier().phoneless()
+		self.phoneless = self.derniere_occurence_fichier().phoneless()
+		self.save()
 
 
 @receiver(post_save, sender=Adherent)
 def initiate_member(sender, instance, created, **kwargs):
 	new_member, created = Member.objects.get_or_create(id=instance.num_adherent)
-
+	new_member.check_if_phoneless()
 
 
 class Note(models.Model):
