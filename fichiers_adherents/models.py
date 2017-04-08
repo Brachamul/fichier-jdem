@@ -184,9 +184,6 @@ class Adherent(models.Model):
 			naissance = naissance.date()
 		return naissance < dt.datetime.now().date() - dt.timedelta(days=12053.25) # 33 ans
 
-	def notes(self):
-		return Note.objects.filter(num_adherent=self.num_adherent)
-
 	def phoneless(self):
 		if self.tel_portable or self.tel_bureau or self.tel_domicile :
 			return False

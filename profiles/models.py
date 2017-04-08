@@ -22,6 +22,9 @@ class Member(models.Model):
 		fichier = FichierAdherents.objects.filter(adherent__in=adherents)
 		return Adherent.objects.get(num_adherent=self.id, fichier=fichier.latest())
 
+	def notes(self):
+		return Note.objects.filter(member=self)
+
 	def __str__(self):
 		return str(self.derniere_occurence_fichier())
 
