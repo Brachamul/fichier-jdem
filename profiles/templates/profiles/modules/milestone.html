@@ -1,6 +1,6 @@
 <p>
 	{% if milestone.category ==  'note' %}
-		<i class="fa fa-sticky-note-o"></i> {{ milestone.text }}
+		{{ milestone.text }}
 	{% elif milestone.category ==  'wrong_number' %}
 		<i class="fa fa-exclamation-circle"></i> Mauvais numéro
 	{% elif milestone.category ==  'successful_call' %}

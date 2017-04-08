@@ -5,15 +5,41 @@
 
 <article>
 
-{% if page_title %}<h1>{{ page_title }} :</h1>{% endif %}
-
 {% if adherent %}
 
-	<p><a class="btn btn-secondary btn-block" href=""><i class="fa fa-refresh"></i> Passer</a></p>
+	<h1>{{ adherent.nom_courant }}</h1>
 
-	<p><strong>Nom :</strong> 
-	{{ adherent.nom_courant }}</p>
-	
+	<div class="row">
+		<div class="col-md-3">
+			<p>
+				<a class="btn btn-success btn-block" href="{% url 'phoning__action' operation.id member.id 'success' %}">
+					<i class="fa fa-check"></i> Appel réussi
+				</a>
+			</p>
+		</div>
+		<div class="col-md-3">
+			<p>
+				<a class="btn btn-warning btn-block" href="{% url 'phoning__action' operation.id member.id 'wrongnumber' %}">
+				<i class="fa fa-exclamation-circle"></i> Mauvais n°
+				</a>
+			</p>
+		</div>
+		<div class="col-md-3">
+			<p>
+				<a class="btn btn-info btn-block" href="{% url 'phoning__action' operation.id member.id 'leftmessage' %}">
+				<i class="fa fa-microphone"></i> Mess. laissé
+				</a>
+			</p>
+		</div>
+		<div class="col-md-3">
+			<p>
+				<a class="btn btn-secondary btn-block" href="{% url 'phoning__action' operation.id member.id 'skip' %}">
+				<i class="fa fa-sign-out"></i> Passer
+				</a>
+			</p>
+		</div>
+	</div>
+
 	<p><strong>Ville :</strong>
 	{{ adherent.ville }} ({{ adherent.federation }})<p>
 	
@@ -45,31 +71,8 @@
 	<form method="POST" action="" enctype="multipart/form-data">
 		<div class="form-group">
 			{% csrf_token %}
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" name="call_successful" {% if call_successful %}checked{% endif %}>
-					Appel réussi !
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" name="wrong_number" {% if wrong_number %}checked{% endif %}>
-					Mauvais numéro :(
-				</label>
-			</div>
-
-			<!-- End-of-call buttons -->
-			<!-- TODO make better buttons yeah ?
-			<div class="col-xl-4">
-				<a class="btn btn-secondary btn-block" href=""><i class="fa fa-refresh"></i> Passer</a>
-			</div>
-			<div class="col-xl-4"></div>
-			<div class="col-xl-4"></div>
-			-->
-
-			<hr/>
 			<textarea name="note" class="form-control" maxlength="5000" rows="6"
-			placeholder="Notes..."></textarea>
+			placeholder="Ajouter une note ..."></textarea>
 		</div>
 		<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
 		<div class="form-group">

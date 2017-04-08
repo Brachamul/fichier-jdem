@@ -93,10 +93,6 @@ def coordonnees(request, operation_id):
 			else :
 				operation.targets_called_successfully.remove(member)
 			# Check if number was wront or not
-			if request.POST.get('wrong_number') :
-				operation.targets_with_wrong_number.add(member)
-				new_wrong_number = WrongNumber(member=member, logged_by=request.user)
-				new_wrong_number.save()
 			else :
 				operation.targets_with_wrong_number.remove(member)
 			if request.POST.get('note') :
@@ -135,7 +131,11 @@ def coordonnees(request, operation_id):
 
 @staff_member_required
 def test(request):
-	member = getRandomInstance(Member.objects.all())
+	if request.method == "POST" :
+		num_adherent = request.POST.get('num_adherent')
+		member = Member.objects.get(id=num_adherent)
+	else :
+		member = getRandomInstance(Member.objects.all())
 	return render(request, 'phoning/coordonnees.html', {
 		'member': member,
 		'adherent': member.derniere_occurence_fichier(),
@@ -143,3 +143,23 @@ def test(request):
 		'wrong_number': False,
 		'call_successful': False,
 		})
+
+
+
+def phoning_action(request, operation_id, member_id, action_name) :
+	try :
+		operation = Operation.objects.get(id=operation_id)
+		member = Member.objects.get(id=member_id)
+	except ObjectDoesNotExist:
+		messages.error("L'opération de phoning ou l'adhérent n'ont pas été trouvés.")
+	else :
+		if action_name == 'success' :
+		elif action_name == 'wrongnumber' :
+			operation.targets_with_wrong_number.add(member)
+			new_wrong_number = WrongNumber(member=member, logged_by=request.user)
+			new_wrong_number.save()
+
+		elif action_name == 'leftmessage' :
+		elif action_name == 'skip' :
+		else :
+			messages.error(request, 'Action non reconnue')
