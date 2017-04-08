@@ -95,12 +95,12 @@ def coordonnees(request, operation_id):
 			# Check if number was wront or not
 			if request.POST.get('wrong_number') :
 				operation.targets_with_wrong_number.add(member)
-				new_wrong_number = WrongNumber(member=member, reported_by=request.user)
+				new_wrong_number = WrongNumber(member=member, logged_by=request.user)
 				new_wrong_number.save()
 			else :
 				operation.targets_with_wrong_number.remove(member)
 			if request.POST.get('note') :
-				new_note = Note(member=member, author=request.user, text=request.POST.get('note'))
+				new_note = Note(member=member, logged_by=request.user, text=request.POST.get('note'))
 				new_note.save()
 		else:
 			time_threshold = datetime.now() - timedelta(minutes=20) # 20 minutes ago

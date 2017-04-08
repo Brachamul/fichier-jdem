@@ -85,11 +85,11 @@
 		<a class="btn btn-secondary" href="{% url 'admin:fichiers_adherents_adherent_change' adherent.pk %}"><i class="fa fa-gears"></i> Administrer</a>	
 	{% endif %}
 
-	{% if member.notes %}
+	{% if member.timeline %}
 		<hr/>
-		<h4>Notes :</h4>
-		{% for note in member.notes.all|dictsortreversed:"date" %}
-			{% include 'profiles/modules/affichage_note.html' %}
+		<h4>Historique :</h4>
+		{% for milestone in member.timeline|dictsortreversed:"date" %}
+			{% include 'profiles/modules/milestone.html' %}
 		{% endfor %}
 	{% endif %}
 

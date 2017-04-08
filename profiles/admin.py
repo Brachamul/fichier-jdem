@@ -7,9 +7,30 @@ from .models import *
 class NoteAdmin(admin.ModelAdmin):
 	model = Note
 	list_per_page = 250
-	list_display = ("member", "author", "text", "date")
+	list_display = ("member", "logged_by", "text", "date")
 
 admin.site.register(Note, NoteAdmin)
+
+class WrongNumberAdmin(admin.ModelAdmin):
+	model = WrongNumber
+	list_per_page = 250
+	list_display = ("member", "logged_by", "date")
+
+admin.site.register(WrongNumber, WrongNumberAdmin)
+
+class SuccessfulCallAdmin(admin.ModelAdmin):
+	model = SuccessfulCall
+	list_per_page = 250
+	list_display = ("member", "logged_by", "date")
+
+admin.site.register(SuccessfulCall, SuccessfulCallAdmin)
+
+class LeftMessageAdmin(admin.ModelAdmin):
+	model = LeftMessage
+	list_per_page = 250
+	list_display = ("member", "logged_by", "date")
+
+admin.site.register(LeftMessage, LeftMessageAdmin)
 
 
 

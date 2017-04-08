@@ -1,0 +1,14 @@
+<p>
+	{% if milestone.category ==  'note' %}
+		<i class="fa fa-sticky-note-o"></i> {{ milestone.text }}
+	{% elif milestone.category ==  'wrong_number' %}
+		<i class="fa fa-exclamation-circle"></i> Mauvais numéro
+	{% elif milestone.category ==  'successful_call' %}
+		<i class="fa fa-check"></i> Appel réussi !
+	{% elif milestone.category ==  'left_message' %}
+		<i class="fa fa-microphone"></i> Message vocal laissé
+	{% endif %}
+
+	<br/>
+	<small><em style="color: #666">{{ milestone.date|date:"Y-m-d à H:i" }}, par {{ milestone.logged_by }}</em></small>
+</p>
