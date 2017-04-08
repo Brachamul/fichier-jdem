@@ -4,7 +4,7 @@ import datetime as dt
 from django.core.urlresolvers import reverse
 
 from django.contrib.auth.models import User
-from fichiers_adherents.models import Adherent, FichierAdherents, WrongNumber
+from fichiers_adherents.models import Adherent, FichierAdherents
 from phoning.models import Operation
 
 

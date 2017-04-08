@@ -50,6 +50,7 @@ def initiate_member(sender, instance, created, **kwargs):
 	new_member.check_if_phoneless()
 
 
+
 class Note(models.Model):
 
 	member = models.ForeignKey(Member)
@@ -59,5 +60,14 @@ class Note(models.Model):
 	
 	def __str__(self): return self.text
 
-
 # https://codepen.io/codyhouse/pen/FdkEf
+
+
+
+class WrongNumber(models.Model):
+
+	member = models.ForeignKey(Member)
+	reported_by = models.ForeignKey(User)
+	date = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self): return self.member

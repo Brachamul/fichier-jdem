@@ -223,17 +223,6 @@ def adherents_actuels() :
 
 
 
-class WrongNumber(models.Model):
-
-	# todo : fix that
-	adherent = models.ForeignKey(Adherent)
-	reported_by = models.ForeignKey(User)
-	date = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self): return self.adherent
-
-
-
 class Droits(models.Model):
 
 	''' Un groupe d'adhérents définis par une requête, auquel on peut attacher
