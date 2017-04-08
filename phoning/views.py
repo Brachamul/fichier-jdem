@@ -85,7 +85,7 @@ def coordonnees(request, operation_id):
 	else :
 		if request.method == "POST" :
 			num_adherent = request.POST.get('num_adherent')
-			member = Member.objects.get(pk=num_adherent)
+			member = Member.objects.get(id=num_adherent)
 			# Check if call was successful or not
 			if request.POST.get('call_successful') :
 				operation.targets_called_successfully.add(member)
