@@ -8,6 +8,6 @@ urlpatterns = [
 	url(r'^operations/$', views.OperationsList.as_view(), name='phoning_operations'),
 	url(r'^operations/(?P<operation_id>[0-9]+)/$', views.coordonnees, name='coordonnees'),
 	url(r'^operations/(?P<operation_id>[0-9]+)/liste/$', views.OperationTargets.as_view(), name='operation_targets'),
-	url(r'^operations/(?P<operation_id>[0-9]+)/(?P<member_id>[0-9]+)/(?P<action_name>[\w]+)/$', views.phoning_action, name='phoning__action'),
+	url(r'^operations/(?P<operation_id>[0-9]+)/(?P<member_id>[0-9]+)/(?P<event_type>[\w]+)/$', views.phoning_event, name='phoning__event'),
 	url(r'^operations/test/$', views.test, name='phoning__test'),
 ]

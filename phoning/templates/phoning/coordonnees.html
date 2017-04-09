@@ -12,28 +12,28 @@
 	<div class="row">
 		<div class="col-md-3">
 			<p>
-				<a class="btn btn-success btn-block" href="{% url 'phoning__action' operation.id member.id 'success' %}">
+				<a class="btn btn-success btn-block" href="{% url 'phoning__event' operation.id member.id 'success' %}">
 					<i class="fa fa-check"></i> Appel réussi
 				</a>
 			</p>
 		</div>
 		<div class="col-md-3">
 			<p>
-				<a class="btn btn-warning btn-block" href="{% url 'phoning__action' operation.id member.id 'wrongnumber' %}">
+				<a class="btn btn-warning btn-block" href="{% url 'phoning__event' operation.id member.id 'wrongnumber' %}">
 				<i class="fa fa-exclamation-circle"></i> Mauvais n°
 				</a>
 			</p>
 		</div>
 		<div class="col-md-3">
 			<p>
-				<a class="btn btn-info btn-block" href="{% url 'phoning__action' operation.id member.id 'leftmessage' %}">
+				<a class="btn btn-info btn-block" href="{% url 'phoning__event' operation.id member.id 'leftmessage' %}">
 				<i class="fa fa-microphone"></i> Mess. laissé
 				</a>
 			</p>
 		</div>
 		<div class="col-md-3">
 			<p>
-				<a class="btn btn-secondary btn-block" href="{% url 'phoning__action' operation.id member.id 'skip' %}">
+				<a class="btn btn-secondary btn-block" href="{% url 'phoning__event' operation.id member.id 'skip' %}">
 				<i class="fa fa-sign-out"></i> Passer
 				</a>
 			</p>

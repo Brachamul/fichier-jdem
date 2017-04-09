@@ -83,37 +83,33 @@ def initiate_member(sender, instance, created, **kwargs):
 
 # https://codepen.io/codyhouse/pen/FdkEf
 
+class PhoningEvent(models.Model):
+
+	member = models.ForeignKey(Member)
+	operation = models.ForeignKey(Operation, blank=True, null=True)
+	logged_by = models.ForeignKey(User)
+	date = models.DateTimeField(auto_now_add=True)
+
+	event_type = models.CharField(max_length=64, choices=(
+		('success', 'success'),
+		('wrongnumber', 'wrongnumber'),
+		('leftmessage', 'leftmessage'),
+		('skip', 'skip')
+		))
+
+	def __str__(self):
+		return self.text
+
+
+
 class Note(models.Model):
 
 	member = models.ForeignKey(Member)
+	operation = models.ForeignKey(Operation, blank=True, null=True)
 	logged_by = models.ForeignKey(User)
-	text = models.CharField(max_length=1024)
 	date = models.DateTimeField(auto_now_add=True)
+
+	text = models.CharField(max_length=1024, blank=True, null=True)
 	
-	def __str__(self): return self.text
-
-class WrongNumber(models.Model):
-
-	member = models.ForeignKey(Member)
-	logged_by = models.ForeignKey(User)
-	date = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self): return self.member
-
-class SuccessfulCall(models.Model):
-
-	member = models.ForeignKey(Member)
-	logged_by = models.ForeignKey(User)
-	date = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self): return self.member
-
-class LeftMessage(models.Model):
-
-	member = models.ForeignKey(Member)
-	logged_by = models.ForeignKey(User)
-	date = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self): return self.member
-
-
+	def __str__(self):
+		return self.text

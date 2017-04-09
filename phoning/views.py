@@ -87,12 +87,6 @@ def coordonnees(request, operation_id):
 		if request.method == "POST" :
 			num_adherent = request.POST.get('num_adherent')
 			member = Member.objects.get(id=num_adherent)
-			# Check if call was successful or not
-			if request.POST.get('call_successful') :
-				operation.targets_called_successfully.add(member)
-			else :
-				operation.targets_called_successfully.remove(member)
-			# Check if number was wront or not
 			else :
 				operation.targets_with_wrong_number.remove(member)
 			if request.POST.get('note') :
@@ -146,20 +140,25 @@ def test(request):
 
 
 
-def phoning_action(request, operation_id, member_id, action_name) :
+def phoning_event(request, operation_id, member_id, event_type) :
 	try :
 		operation = Operation.objects.get(id=operation_id)
 		member = Member.objects.get(id=member_id)
 	except ObjectDoesNotExist:
 		messages.error("L'opération de phoning ou l'adhérent n'ont pas été trouvés.")
 	else :
-		if action_name == 'success' :
-		elif action_name == 'wrongnumber' :
-			operation.targets_with_wrong_number.add(member)
-			new_wrong_number = WrongNumber(member=member, logged_by=request.user)
-			new_wrong_number.save()
-
-		elif action_name == 'leftmessage' :
-		elif action_name == 'skip' :
+		if event_type in ['success', 'wrongnumber', 'leftmessage'] :
+			# Call was successful, number was wrong or message was left
+			event = PhoningEvent(
+				member=member,
+				operation=operation,
+				logged_by=request.user,
+				event_type=event_type
+				)
+			event.save()
+		elif event_type == 'skip' :
+			# User doesn't want to call this person, don't show for them
+			# TODO
+			pass
 		else :
 			messages.error(request, 'Action non reconnue')
