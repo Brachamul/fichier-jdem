@@ -36,6 +36,8 @@ class NetworkUser(models.Model):
 			
 			# check if a user with that username doesn't already exist
 			try :
+				print('----------')
+				print(user_details)
 				user_with_same_username = User.objects.get(username=user_details['username'])
 			except User.DoesNotExist :
 				# no user with that username exist, let's try and create the user
