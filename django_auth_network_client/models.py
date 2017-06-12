@@ -43,10 +43,19 @@ class NetworkUser(models.Model):
 					self.user = User.objects.create_user(**user_details)
 				except IntegrityError :
 					raise UserCreationError
+				else :
+					warn_when_new_account(user_details['username']) # sends an email to the admins
+
 			else :
-				# there is already a user with that username, so we tie the network user to it
+				# todo this is all shitty because if homophone, we are doomed
+				# there is already a user with that username, so we want to bind the network user to it
 				# this is a recovery feature, not supposed to actually be used
+
+				NetworkUser.objects.filter(user=user_with_same_username).delete()
+				# clear networkusers that might already be bound to that user
+
 				self.user = user_with_same_username
+
 
 			self.save()
 
@@ -56,22 +65,19 @@ class NetworkUser(models.Model):
 			user.update(**user_details)
 
 
+def warn_when_new_account(username):
+	subject = '[Fiji] ' + '{} a créé un compte !'.format(username)
+	text = \
+		'''
 
-@receiver(post_save, sender=NetworkUser)
-def warn_when_new_account(sender, **kwargs):
-	if created :
-		new_user_name = sender.user.username
-		subject = '[Fiji] ' + '{} a créé un compte !'.format(new_user_name)
-		text = \
-			'''
-			{} vient de créer un compte sur http://fichier.jdem.fr.
-	
-			Si nécessaire, vous pouvez désormais lui accorder des droits sur une partie du fichier.
-	
-			-
-			Message automatique envoyé par Fiji
-			'''.format(new_user_name)
-		text = textwrap.dedent(text) # removes useless indentations from the email text
-		recipient_list = ['federations@jeunes-democrates.org',]
-		message = ( subject, text, from_email, recipient_list )
-		send_mail(message)
+		{} vient de créer un compte sur http://fichier.jdem.fr.
+		Si nécessaire, vous pouvez désormais lui accorder des droits sur une partie du fichier.
+		
+		-
+		Message automatique envoyé par Fiji
+		
+		'''.format(username)
+	text = textwrap.dedent(text) # removes useless indentations from the email text
+	recipient_list = ['federations@jeunes-democrates.org',]
+	message = ( subject, text, from_email, recipient_list )
+	send_mail(message)
