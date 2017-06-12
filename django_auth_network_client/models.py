@@ -1,7 +1,8 @@
 import os, requests, json
 import uuid
-from django.db import models, IntegrityError
 from django.conf import settings
+from django.db import models, IntegrityError
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from django.contrib.auth.models import User
@@ -10,10 +11,11 @@ from django.contrib.auth.models import User
 
 class UserCreationError(Exception): pass
 
+
+
 class NetworkUser(models.Model):
 
-	''' The NetworkUser is an extension of the standard Django User model.
-	Each User is '''
+	''' The NetworkUser is an extension of the standard Django User model. '''
 
 	user = models.OneToOneField(User, null=True, related_name='network_user')
 	uuid = models.UUIDField(primary_key=True, max_length=32, default=uuid.uuid4, editable=False)
@@ -52,3 +54,24 @@ class NetworkUser(models.Model):
 			# Otherwise, just update the user's account with more recent details
 			user = User.objects.filter(pk=self.user.pk) #
 			user.update(**user_details)
+
+
+
+@receiver(post_save, sender=NetworkUser)
+def warn_when_new_account(sender, **kwargs):
+	if created :
+		new_user_name = sender.user.username
+		subject = '[Fiji] ' + '{} a créé un compte !'.format(new_user_name)
+		text = \
+			'''
+			{} vient de créer un compte sur http://fichier.jdem.fr.
+	
+			Si nécessaire, vous pouvez désormais lui accorder des droits sur une partie du fichier.
+	
+			-
+			Message automatique envoyé par Fiji
+			'''.format(new_user_name)
+		text = textwrap.dedent(text) # removes useless indentations from the email text
+		recipient_list = ['federations@jeunes-democrates.org',]
+		message = ( subject, text, from_email, recipient_list )
+		send_mail(message)
