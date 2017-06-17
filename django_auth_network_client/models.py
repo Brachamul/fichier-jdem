@@ -36,9 +36,8 @@ class NetworkUser(models.Model):
 			# we'll need to create an account for them
 			
 			# check if a user with that username doesn't already exist
-			try :
-				user_with_same_username = User.objects.get(username=user_details['username'])
-			except ObjectDoesNotExist :
+			user_with_same_username = User.objects.filter(username=user_details['username'])
+			if not users_with_same_username
 				# no user with that username exist, let's try and create the user
 				try :
 					self.user = User.objects.create_user(**user_details)
@@ -48,14 +47,14 @@ class NetworkUser(models.Model):
 					warn_when_new_account(user_details['username']) # sends an email to the admins
 
 			else :
-				# todo this is all shitty because if homophone, we are doomed
+				# TODO this is all shitty because if homophone, we are doomed
 				# there is already a user with that username, so we want to bind the network user to it
 				# this is a recovery feature, not supposed to actually be used
 
-				NetworkUser.objects.filter(user=user_with_same_username).delete()
+				NetworkUser.objects.filter(user=users_with_same_username[0]).delete()
 				# clear networkusers that might already be bound to that user
 
-				self.user = user_with_same_username
+				self.user = users_with_same_username[0]
 
 
 			self.save()
