@@ -37,7 +37,7 @@ class NetworkUser(models.Model):
 			
 			# check if a user with that username doesn't already exist
 			user_with_same_username = User.objects.filter(username=user_details['username'])
-			if not users_with_same_username
+			if not users_with_same_username :
 				# no user with that username exist, let's try and create the user
 				try :
 					self.user = User.objects.create_user(**user_details)
