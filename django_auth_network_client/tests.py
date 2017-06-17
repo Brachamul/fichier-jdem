@@ -2,7 +2,8 @@ import uuid
 from django.test import TestCase, Client
 
 from django.contrib.auth.models import User
-from django_auth_network_client.models import NetworkUser
+from django.core import mail
+from django_auth_network_client.models import NetworkUser, warn_when_new_account
 
 
 class NetworkUserTestCase(TestCase):
@@ -22,6 +23,11 @@ class NetworkUserTestCase(TestCase):
 
 		# Check that user creation was successful with correct user details
 		self.assertEqual(network_user.user.email, user_details['email'])
+
+		# Check that an email warning was sent following the creation
+		self.assertEqual(len(mail.outbox), 1)
+		self.assertEqual(mail.outbox[0].subject, "[Fiji] Monsieur Patate a créé un compte !")
+
 
 		user_details = {
 			'username': 'Monsieur Patate',

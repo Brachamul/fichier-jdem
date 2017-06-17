@@ -1,10 +1,10 @@
-import os, requests, json
-import uuid
+import os, requests, json, uuid, textwrap
 from django.conf import settings
 from django.db import models, IntegrityError
+from django.conf import settings
+from django.core.mail import send_mail, send_mass_mail
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from django.contrib.auth.models import User
 
 
@@ -36,8 +36,6 @@ class NetworkUser(models.Model):
 			
 			# check if a user with that username doesn't already exist
 			try :
-				print('----------')
-				print(user_details)
 				user_with_same_username = User.objects.get(username=user_details['username'])
 			except User.DoesNotExist :
 				# no user with that username exist, let's try and create the user
@@ -79,7 +77,7 @@ def warn_when_new_account(username):
 		Message automatique envoyé par Fiji
 		
 		'''.format(username)
+	from_email = settings.EMAIL_FROM
 	text = textwrap.dedent(text) # removes useless indentations from the email text
 	recipient_list = ['federations@jeunes-democrates.org',]
-	message = ( subject, text, from_email, recipient_list )
-	send_mail(message)
+	send_mail(subject, text, from_email, recipient_list)
