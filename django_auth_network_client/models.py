@@ -1,11 +1,12 @@
 import os, requests, json, uuid, textwrap
 from django.conf import settings
 from django.db import models, IntegrityError
-from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, send_mass_mail
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
+
 
 
 
@@ -37,7 +38,7 @@ class NetworkUser(models.Model):
 			# check if a user with that username doesn't already exist
 			try :
 				user_with_same_username = User.objects.get(username=user_details['username'])
-			except User.DoesNotExist :
+			except ObjectDoesNotExist :
 				# no user with that username exist, let's try and create the user
 				try :
 					self.user = User.objects.create_user(**user_details)
