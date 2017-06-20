@@ -172,7 +172,7 @@ MIDDLEWARE_CLASSES += [
 
 WAGTAIL_SITE_NAME = "du guide des responsables de fédérations"
 
-#TODO : add some logging
+WAGTAIL_FRONTEND_LOGIN_URL = LOGIN_URL # use custom auth, even for CMS access
 
 
 # EMAILING

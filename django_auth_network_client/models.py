@@ -21,8 +21,6 @@ class NetworkUser(models.Model):
 	user = models.OneToOneField(User, null=True, related_name='network_user')
 	uuid = models.UUIDField(primary_key=True, max_length=32, default=uuid.uuid4, editable=False)
 
-	# TODO : handle cascading when a user is deleted on Centrifuge
-
 	def __str__(self):
 		return str(self.user)
 
@@ -47,7 +45,6 @@ class NetworkUser(models.Model):
 					warn_when_new_account(user_details['username']) # sends an email to the admins
 
 			else :
-				# TODO this is all shitty because if homophone, we are doomed
 				# there is already a user with that username, so we want to bind the network user to it
 				# this is a recovery feature, not supposed to actually be used
 
