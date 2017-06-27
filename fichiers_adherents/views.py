@@ -215,22 +215,24 @@ def adherents_visibles(request):
 	''' Renvoie la liste des adhérents actuels que l'utilisateur a le droit de voir '''
 	
 	droits = request.user.droits_set.all()
-	if not droits :
-		return []
-	else :
+	if droits :
+		# l'utilisateur dispose de droits de vue sur le fichier
 		departements = set()
 		for droits in droits :
 			query = json.loads(droits.query)
+			# query est un numéro de département ou une liste de numéros de départements
 			if type(query) is list :
+				# si c'est une liste, il y a plusieurs départements à ajouter
 				for departement in query :
 					departements.add(departement)
 			else :
 				departements.add(query)
-		departements = list(departements)
+		departements = list(departements) # convert set to list
 		result = adherents_actuels().filter(federation__in=departements)
 		return result
-		# TODO : querify like in phoning app ?
-
+	else :
+		# l'utilisateur ne dispose pas de droits de vue sur le fichier
+		return []
 
 
 

@@ -22,7 +22,8 @@ from wagtail.wagtaildocs import urls as wagtaildocs_urls
 from wagtail.wagtailcore import urls as wagtail_urls
 
 urlpatterns += [
-    url(r'^cms/', include(wagtailadmin_urls)),
-    url(r'^documents/', include(wagtaildocs_urls)),
-    url(r'^', include(wagtail_urls)),
+	url(r'^cms/login/', RedirectView.as_view(url="/auth/", permanent=False)),
+	url(r'^cms/', include(wagtailadmin_urls)),
+	url(r'^documents/', include(wagtaildocs_urls)),
+	url(r'^', include(wagtail_urls)),
 ]
