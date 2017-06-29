@@ -73,35 +73,34 @@ class OperationTargets(ListView):
 
 @login_required
 def coordonnees(request, operation_id):
+
+	''' This view pulls an individual from the call list and 
+	displays their data so we can interact with them '''
+
 	operation = get_object_or_404(Operation, pk=operation_id)
-	if request.user not in operation.authorized_users.all() :
-		messages.error(request, "Vous n'êtes pas encore autorisé à participer à cette opération.")
+
+	if not operation_requirements_are_met(request, operation) :
+		# there are several requirements that need to be met before we can show this view
 		return redirect('phoning')
-	elif operation.valid_until < datetime.now() :
-		messages.error(request, "Cette opération de phoning est arrivée à son terme.")
-		return redirect('phoning')
-	elif not Adherent.objects.count() : 
-		messages.error(request, "Il n'y a aucun adhérent dans la base.")
-		return redirect('phoning')
+
 	else :
 		if request.method == "POST" :
+			# the user has triggered an action for this adherent
 			num_adherent = request.POST.get('num_adherent')
-			member = Member.objects.get(id=num_adherent)
-			# Check if call was successful or not
-			if request.POST.get('call_successful') :
-				operation.targets_called_successfully.add(member)
+			try : 
+				member = Member.objects.get(id=num_adherent)
+			except Member.DoesNotExist:
+				messages.error(request, "Cet adhérent n'a pas été retrouvé.")
+				return redirect('coordonnees', kwargs={'operation_id': operation_id})
 			else :
-				operation.targets_called_successfully.remove(member)
-			# Check if number was wront or not
-			if request.POST.get('wrong_number') :
-				operation.targets_with_wrong_number.add(member)
-				new_wrong_number = WrongNumber(member=member, reported_by=request.user)
-				new_wrong_number.save()
-			else :
-				operation.targets_with_wrong_number.remove(member)
-			if request.POST.get('note') :
-				new_note = Note(member=member, author=request.user, text=request.POST.get('note'))
-				new_note.save()
+				process_phoning_action(
+					editor = request.user,
+					member = member,
+					call_successful = request.POST.get('call_successful'),
+					wrong_number = request.POST.get('wrong_number'),
+					note = request.POST.get('note'),
+					)
+
 		else:
 			time_threshold = datetime.now() - timedelta(minutes=20) # 20 minutes ago
 			recentRequests = UserRequest.objects.filter(user=request.user).exclude(date__lt=time_threshold)
@@ -133,6 +132,54 @@ def coordonnees(request, operation_id):
 			'call_successful': operation.targets_called_successfully.filter(pk=member.pk),
 			})
 
+
+def operation_requirements_are_met(request, operation):
+
+	requirements_are_met = True
+
+	if not request.user in operation.authorized_users.all() :
+		messages.error(request, "Vous n'êtes pas encore autorisé à participer à cette opération.")
+		requirements_are_met = False
+		
+	if operation.valid_until < datetime.now() :
+		messages.error(request, "Cette opération de phoning est arrivée à son terme.")
+		requirements_are_met = False
+
+	if not Adherent.objects.count() : 
+		messages.error(request, "Il n'y a aucun adhérent dans la base.")
+		requirements_are_met = False
+
+	return requirements_are_met
+
+
+def process_phoning_action(editor, member, call_successful, wrong_number, note):
+
+	if call_successful :
+		# call was succesful, remove this person from list of people to call on this operation
+		operation.targets_called_successfully.add(member)
+	else :
+		# user has corrected his request to mark the call successful,
+		# so adherent will be added back to the list
+		operation.targets_called_successfully.remove(member)
+
+	if wrong_number :
+		# user says that this adherent's number is wrong
+		# we won't do anything about it, but at least keep it in memory
+		# so that we can automate something with this one day
+		# TODO : make this actually useful
+		operation.targets_with_wrong_number.add(member)
+		new_wrong_number = WrongNumber(member=member, reported_by=editor)
+		new_wrong_number.save()
+	else :
+		operation.targets_with_wrong_number.remove(member)
+
+	if note:
+		# user has written a note, so we add it to the user's profile
+		new_note = Note(member=member, author=editor, text=request.POST.get('note'))
+		new_note.save()
+
+
+
 @staff_member_required
 def test(request):
 	member = getRandomInstance(Member.objects.all())
@@ -143,3 +190,4 @@ def test(request):
 		'wrong_number': False,
 		'call_successful': False,
 		})
+
