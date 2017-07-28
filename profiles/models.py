@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from fichiers_adherents.models import FichierAdherents, Adherent, Cnil, adherents_actuels
+from phoning.models import Operation
 
 
 class Member(models.Model):
