@@ -1,10 +1,10 @@
-<form method="POST" action="" enctype="multipart/form-data">
+<form method="POST" action="{% url 'add_note' num_adherent=adherent.num_adherent %}" enctype="multipart/form-data">
 	<div class="form-group">
 		{% csrf_token %}
-		<textarea name="note" class="form-control" maxlength="1024" rows="3"
-		placeholder="Nouvelle note..."></textarea>
+		<label>Ajouter une note :</label>
+		<textarea name="note" class="form-control" maxlength="1024" rows="2"
+		placeholder="..."></textarea>
 	</div>
-	<input type="hidden" name="num_adherent" value="{{ adherent.num_adherent }}"/>
 	<div class="form-group">
 		<button type="submit" class="btn btn-sm btn-primary">
 			<i class="fa fa-check"></i>

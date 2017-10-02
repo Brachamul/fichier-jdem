@@ -174,7 +174,7 @@ def process_phoning_action(editor, member, call_successful, wrong_number, note):
 		operation.targets_with_wrong_number.remove(member)
 
 	if note:
-		# user has written a note, so we add it to the user's profile
+		# user has written a note, so we add it to the member's profile
 		new_note = Note(member=member, author=editor, text=request.POST.get('note'))
 		new_note.save()
 

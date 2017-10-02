@@ -8,13 +8,10 @@
 <article>
 	<h1>{{ page_title }}</h1>
 	<hr/>
-	Numéro d'adhésion : <strong>{{ adherent.num_adherent }}</strong><br/>
+	Numéro adhérent : <strong>{{ adherent.num_adherent }}</strong><br/>
 	Âge : <strong>{{ adherent.date_de_naissance|timesince }}</strong><br/>
 	Genre : <strong>{{ adherent.genre }}</strong><br/>
-	<hr/>
-	Profession :<br/>
-	<strong>{{ adherent.profession }}</strong><br/>
-	<hr/>
+	Activité : <strong>{{ adherent.profession }}</strong><br/>
 	Email : <strong>{{ adherent.email }}</strong><br/>
 	<hr/>
 	Téléphone :<br/>
@@ -29,9 +26,9 @@
 	{% endif %}
 	<hr/>
 	Première côtisation :
-	<strong>{{ adherent.date_premiere_adhesion }}</strong> ({{ adherent.date_premiere_adhesion|timesince }})<br/>
+	<strong>{{ adherent.date_premiere_adhesion|date:"F Y" }}</strong> ({{ adherent.date_premiere_adhesion|timesince }})<br/>
 	Dernière côtisation :
-	<strong>{{ adherent.date_derniere_cotisation }}</strong><br/>
+	<strong>{{ adherent.date_derniere_cotisation|date:"F Y" }}</strong><br/>
 	<hr/>
 	Adresse :<br/>
 	{% if adherent.adresse1 or adherent.adresse2 or adherent.adresse3 or adherent.adresse4 %}
@@ -58,14 +55,12 @@
 	{% endif %}
 
 	<hr/>
-	<h2>Notes :</h2>
-
-	<p>
+	
 	{% include 'profiles/modules/formulaire_note.html' %}
-	</p>
 
-	<h4>Notes :</h4>
 	{% if member.notes %}
+		<hr/>
+		<h5>Notes</h5>
 		{% for note in member.notes.all|dictsortreversed:"date" %}
 			{% include 'profiles/modules/affichage_note.html' %}
 		{% endfor %}
@@ -78,6 +73,15 @@
 
 
 {% block scripts %}{{ block.super }}
+
+<style>
+
+.note { margin: 1rem 0; }
+.note__meta { color: #666; }
+.note__date { text-transform: lowercase; }
+.note__text { border-left: 4px solid #ccc; padding-left: .5rem; }
+
+</style>
 
 {% endblock scripts %}
 

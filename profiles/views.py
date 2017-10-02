@@ -11,6 +11,8 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
+from django.views.generic.base import TemplateView, RedirectView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import *
 
@@ -23,6 +25,7 @@ class Profile(DetailView):
 
 	model = Member
 	template_name = 'profiles/profile.html'
+	pk_url_kwarg = "num_adherent"
 
 	def dispatch(self, request, *args, **kwargs):
 		# TODO : check if belongs to users i am authorized to see
@@ -37,3 +40,16 @@ class Profile(DetailView):
 		context['page_title'] = adherent.nom_courant()
 		context['adherent'] = adherent
 		return context
+
+
+@login_required
+def add_note(request, num_adherent):
+	''' Save note '''
+	member = get_object_or_404(Member, pk=num_adherent)
+	if request.method == "POST" :
+		note_text = request.POST.get('note')
+		if note_text:
+			# user has written a note, so we add it to the member's profile
+			new_note = Note(member=member, author=request.user, text=note_text)
+			new_note.save()
+	return redirect(reverse('profil', kwargs={'num_adherent': num_adherent}))
