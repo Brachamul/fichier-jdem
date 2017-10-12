@@ -1,13 +1,3 @@
-# AUTH NETWORK SETTINGS
-AUTH_NETWORK_URL = 'http://localhost:8007/'
-AUTH_NETWORK_KEY = 'PLEASE_SET_NETWORK_AUTH_KEY'
-AUTH_NETWORK_SECRET = 'PLEASE_SET_NETWORK_AUTH_SECRET'
-
-ANYMAIL = {
-	"MAILGUN_API_KEY": "key-***",
-	"MAILGUN_SENDER_DOMAIN": "mailgun.jdem.fr",
-}
-
 # STANDARD SETTINGS
 SITE_URL = 'localhost' # use http:// in production
 ALLOWED_HOSTS = [SITE_URL, ]
@@ -20,9 +10,46 @@ EMAIL_USE_TLS = False
 EMAIL_HOST = 'smtp.jdem.fr'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'fichier@jdem.fr'
-EMAIL_HOST_PASSWORD = '-'
+EMAIL_HOST_PASSWORD = 'XXX'
 EMAIL_ROOT = 'http://localhost:8008'
 EMAIL_FROM = 'Fichier JDem <fichier@jdem.fr>'
+
+
+
+# DJANGO AUTH NETWORK CONFIG
+
+import textwrap
+def subject_generator(username):
+	# convert to kwargs maybe
+	subject = '[Fiji] ' + '{} a créé un compte !'.format(username)
+
+def text_generator(username):
+	# convert to kwargs maybe
+	text = \
+		'''
+
+		{} vient de créer un compte sur http://fichier.jdem.fr.
+		Si nécessaire, vous pouvez désormais lui accorder des droits sur une partie du fichier.
+		
+		-
+		Message automatique envoyé par Fiji
+		
+		'''.format(username)
+	text = textwrap.dedent(text) # removes useless indentations from the email text
+	return text
+
+DJANGO_AUTH_NETWORK_CONFIG = {
+	'URL': '', # e.g. : 'http://localhost:8007/'
+	'KEY': '', # UUID
+	'SECRET' : '', # UUID
+	'WARN_WHEN_NEW_ACCOUNT': {
+		'SUBJECT_GENERATOR': subject_generator,
+		'TEXT_GENERATOR': text_generator,
+		'FROM_EMAIL': EMAIL_FROM,
+		'RECIPIENT_LIST': ['',],
+	}
+}
+
 
 # LOGGING SETTINGS
 LOGGING = {
@@ -49,7 +76,6 @@ LOGGING = {
 		},
 	},
 }
-
 
 #	CSRF_COOKIE_SECURE = False
 #	SESSION_COOKIE_SECURE = False

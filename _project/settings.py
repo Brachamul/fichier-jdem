@@ -140,11 +140,6 @@ MESSAGE_TAGS = { messages.ERROR: 'danger' }
 # CENTRIFUGE NETWORK AUTH
 
 INSTALLED_APPS += ['django_auth_network_client',]
-''' The following values must be set in local settings '''
-NETWORK_AUTH_URL	= 'PLEASE SET NETWORK_AUTH_URL' # e.g. : 'http://localhost:8007/'
-NETWORK_AUTH_KEY	= 'PLEASE SET NETWORK_AUTH_KEY' # UUID
-NETWORK_AUTH_SECRET	= 'PLEASE SET NETWORK_AUTH_SECRET' # UUID
-
 
 # WAGTAIL CMS
 
@@ -182,7 +177,7 @@ INSTALLED_APPS += ['anymail',]
 DEFAULT_FROM_EMAIL = "Fiji - le fichier JDem <fichier@jdem.fr>"
 EMAIL_SHOULD_FAIL_SILENTLY = True 
 
-EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"  # or sendgrid.SendGridBackend, or...
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"  # or sendgrid.SendGridBackend, or...
 
 # Note that the "ANYMAIL" variable including API key and sender domain must be set in local settings
 
