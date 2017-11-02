@@ -30,8 +30,9 @@
 	<p>Vous avez les droits de consultation pour :
 		{% for droits in user.droits_set.all %}<span class="tag tag-default">{{ droits }}</span> {% endfor %}
 	</p>
+	<p>Pour rappel, sont affichés uniquement les personnes ayant cotisé pour la dernière fois cette année calendaire, l'année dernière et l'année précédente.</p>
 {% else %}
-	<div class="alert alert-info">Vous n'avez pas de droits de consultation du fichier.</div>
+	<div class="alert alert-info">Vous n'avez pas de droits de consultation du fichier. Si vous venez de créer votre compte, contactez secretariat-general@jeunes-democrates.org pour demander à ce que vos droits soient attribués.</div>
 {% endif %}
 
 <div class="table-responsive">

@@ -175,14 +175,14 @@ class Adherent(models.Model):
 		derniere_cotisation = self.date_derniere_cotisation
 		if isinstance(derniere_cotisation, dt.datetime) : # for some reason the datefield sometimes contains datetime values
 			derniere_cotisation = derniere_cotisation.date()
-		return derniere_cotisation > self.fichier.date - dt.timedelta(days=730.5) # 2 ans
+		return derniere_cotisation.year >= self.fichier.date.year - 2 # l'année en cours, la précédente et celle d'avant
 
 	def calculer_si_trop_vieux(self):
 		naissance = self.date_de_naissance
 		if not naissance : return True # sans date, on considère que l'adhérent est trop âgé
 		if isinstance(naissance, dt.datetime) : # for some reason the datefield sometimes contains datetime values
 			naissance = naissance.date()
-		return naissance < dt.datetime.now().date() - dt.timedelta(days=12053.25) # 33 ans
+		return naissance < dt.datetime.now().date() - dt.timedelta(days=365.25*33) # 33 ans
 
 	def phoneless(self):
 		if self.tel_portable or self.tel_bureau or self.tel_domicile :
