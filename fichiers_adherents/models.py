@@ -141,7 +141,10 @@ class Adherent(models.Model):
 	# Utilitaires
 	
 	def anciennete(self):
-		return dt.datetime.now().date() - self.date_premiere_adhesion
+		if self.date_premiere_adhesion :
+			return dt.datetime.now().date() - self.date_premiere_adhesion
+		else:
+			return None
 	
 	def jours_depuis_la_derniere_cotisation(self):
 		return (dt.datetime.now().date() - self.date_derniere_cotisation).days
@@ -160,7 +163,10 @@ class Adherent(models.Model):
 			return False
 
 	def est_recent(self):
-		return self.anciennete().days < 90
+		if self.anciennete() :
+			return self.anciennete().days < 90
+		else :
+			return None
 
 	def has_resubbed(self, fichier):
 		# regarde si l'adhérent a réadhéré depuis le fichier précédent

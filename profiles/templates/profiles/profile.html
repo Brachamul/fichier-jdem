@@ -26,7 +26,11 @@
 	{% endif %}
 	<hr/>
 	Première côtisation :
-	<strong>{{ adherent.date_premiere_adhesion|date:"F Y" }}</strong> ({{ adherent.date_premiere_adhesion|timesince }})<br/>
+	{% if adherent.date_premiere_adhesion %}
+		<strong>{{ adherent.date_premiere_adhesion|date:"F Y" }}</strong> ({{ adherent.date_premiere_adhesion|timesince }})<br/>
+	{% else %}
+		<strong class="text-muted">Inconnue</strong><br/>
+	{% endif %}
 	Dernière côtisation :
 	<strong>{{ adherent.date_derniere_cotisation|date:"F Y" }}</strong><br/>
 	<hr/>
