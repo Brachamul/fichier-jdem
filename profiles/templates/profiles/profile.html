@@ -28,7 +28,7 @@
 	Première côtisation :
 	{% if adherent.date_premiere_adhesion %}
 		<strong>{{ adherent.date_premiere_adhesion|date:"F Y" }}</strong> ({{ adherent.date_premiere_adhesion|timesince }})<br/>
-	{% elif adherent.nouveau %}
+	{% elif adherent.est_recent %}
 		<strong class="text-muted">Inconnue mais récente</strong><br/>
 	{% else %}
 		<strong class="text-muted">Inconnue</strong><br/>

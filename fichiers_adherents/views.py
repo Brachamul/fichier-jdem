@@ -175,7 +175,6 @@ def importation(fichier):
 				mandats = row['Mandats'].replace("\n", ", "),
 				commune = row['Commune'],
 				canton = row['Canton'],
-				nouveau = process_csv_truth(row['Nouveau']),
 				)
 
 def process_csv_date(csv_date):
