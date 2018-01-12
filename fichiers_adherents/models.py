@@ -153,10 +153,10 @@ class Adherent(models.Model):
 		try : return self.prenom + " " + self.nom
 		except NameError : return "Anonyme"
 
-	def est_nouveau(self, fichier):
+	def est_nouveau(self):
 		# regarde si l'adhérent existait déjà dans le fichier précédent
 		try :
-			adherent_ancien = Adherent.objects.get(fichier=fichier.get_previous_by_date(), num_adherent=self.num_adherent)
+			adherent_ancien = Adherent.objects.get(fichier=self.fichier.get_previous_by_date(), num_adherent=self.num_adherent)
 		except (Adherent.DoesNotExist, FichierAdherents.DoesNotExist) :
 			return True
 		else :
