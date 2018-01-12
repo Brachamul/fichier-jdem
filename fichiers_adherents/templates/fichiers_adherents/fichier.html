@@ -66,7 +66,7 @@
 			<td class="center">{{ adherent.federation }}</td>
 			<td>{{ adherent.ville }}</td>
 			<td><a href="{% url 'profil' adherent.num_adherent %}">
-				{% if adherent.est_recent %}<span data-toggle="tooltip" title="Cet adhérent·e est nouveau·elle !">★<span>{% endif %}
+				{% if adherent.est_recent or adherent.nouveau %}<span data-toggle="tooltip" title="Cet adhérent·e est nouveau·elle !">★<span>{% endif %}
 				{{ adherent.nom }}</a></td>
 			<td><a href="{% url 'profil' adherent.num_adherent %}">{{ adherent.prenom }}</a></td>
 			<td>{{ adherent.date_de_naissance|timesince }}</td>

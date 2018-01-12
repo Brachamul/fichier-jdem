@@ -175,11 +175,17 @@ def importation(fichier):
 				mandats = row['Mandats'].replace("\n", ", "),
 				commune = row['Commune'],
 				canton = row['Canton'],
+				nouveau = process_csv_truth(row['Nouveau']),
 				)
 
 def process_csv_date(csv_date):
 	if csv_date : return dt.datetime.strptime(csv_date, '%d/%m/%Y').date()
 	else : return None
+
+def process_csv_truth(csv_truth):
+	if csv_truth == "oui" :
+	else : return False
+
 
 def homme_ou_femme(title):
 	if title == "Mlle" or title == 'Mme' : return "F"
