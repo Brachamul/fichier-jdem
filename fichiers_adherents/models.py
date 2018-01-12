@@ -166,7 +166,7 @@ class Adherent(models.Model):
 		if self.anciennete() :
 			return self.anciennete().days < 90
 		else :
-			return None
+			return False
 
 	def has_resubbed(self, fichier):
 		# regarde si l'adhérent a réadhéré depuis le fichier précédent
