@@ -130,7 +130,6 @@ class Adherent(models.Model):
 	mandats = models.CharField(max_length=255, null=True, blank=True)
 	commune = models.CharField(max_length=255, null=True, blank=True) # Dans le cas où la personne est élue dans une autre commune que sa ville de résidence.
 	canton = models.CharField(max_length=255, null=True, blank=True)
-	nouveau = models.BooleanField(default=False) # False just means the info is not provided
 	a_jour_de_cotisation = models.BooleanField(default=False)
 	trop_vieux = models.BooleanField(default=False)
 

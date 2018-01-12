@@ -181,11 +181,6 @@ def process_csv_date(csv_date):
 	if csv_date : return dt.datetime.strptime(csv_date, '%d/%m/%Y').date()
 	else : return None
 
-def process_csv_truth(csv_truth):
-	if csv_truth == "oui" :
-	else : return False
-
-
 def homme_ou_femme(title):
 	if title == "Mlle" or title == 'Mme' : return "F"
 	elif title == "M." : return "H"
