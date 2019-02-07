@@ -53,5 +53,6 @@ class FichierAdherentsAdmin(admin.ModelAdmin):
 	model = FichierAdherents
 	list_per_page = 50
 	inlines = [AdherentInline, ]
+	list_display = ("pk", "date_d_import", "date", "importateur", "fichier_csv", )
 
 admin.site.register(FichierAdherents, FichierAdherentsAdmin)
