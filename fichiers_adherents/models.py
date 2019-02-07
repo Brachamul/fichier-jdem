@@ -205,8 +205,8 @@ class Adherent(models.Model):
 		ordering = ['nom']
 		get_latest_by = "fichier"
 		permissions = (('lecture_fichier_national', 'peut lire le fichier national'),)
-		verbose_name = "adhérent".encode('utf-8')
-		verbose_name_plural = 'adhérents'.encode('utf-8')
+		verbose_name = "adhérent"
+		verbose_name_plural = "adhérents"
 
 
 
@@ -240,8 +240,8 @@ class Droits(models.Model):
 
 	class Meta:
 		ordering = ['name']
-		verbose_name = "droit d'accès".encode('utf-8')
-		verbose_name_plural = "droits d'accès".encode('utf-8')
+		verbose_name = "droit d'accès"
+		verbose_name_plural = "droits d'accès"
 
 	def __str__(self): return self.name
 
