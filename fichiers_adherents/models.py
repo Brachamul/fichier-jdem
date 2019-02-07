@@ -17,7 +17,7 @@ class FichierAdherents(models.Model):
 
 	date_d_import = models.DateTimeField(auto_now_add=True)
 	date = models.DateField()
-	importateur = models.ForeignKey(User)
+	importateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 	fichier_csv = models.FileField(upload_to='fichiers_adherents/', null=True)
 
 	def delete(self,*args,**kwargs):

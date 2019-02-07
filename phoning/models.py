@@ -16,13 +16,13 @@ class Operation(models.Model):
 	targets_called_successfully = models.ManyToManyField(Member, related_name='operations_where_called', blank=True)
 	targets_with_wrong_number = models.ManyToManyField(Member, related_name='operations_where_wrong_number_found', blank=True)
 	valid_until = models.DateTimeField()
-	created_by = models.ForeignKey(User)
+	created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 	created = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return self.name
 
 class UserRequest(models.Model):
-	user = models.ForeignKey(User)
-	operation = models.ForeignKey(Operation)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	operation = models.ForeignKey(Operation, on_delete=models.CASCADE)
 	date = models.DateTimeField(auto_now_add=True)

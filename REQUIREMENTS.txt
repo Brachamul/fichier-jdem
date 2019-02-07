@@ -7,3 +7,4 @@ raven
 requests
 wagtail
 slugify
+django-auth-network-client

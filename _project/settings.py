@@ -39,14 +39,13 @@ INSTALLED_APPS = [
 from slugify import slugify
 AUTOSLUG_SLUGIFY_FUNCTION = slugify
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
 	'django.middleware.gzip.GZipMiddleware',
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
 	'django.middleware.common.CommonMiddleware',
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 #	'_project.middleware.LoginRequiredMiddleware', # TODO : reactivate
@@ -144,25 +143,25 @@ INSTALLED_APPS += ['django_auth_network_client',]
 # WAGTAIL CMS
 
 INSTALLED_APPS += [
-	'wagtail.wagtailforms',
-	'wagtail.wagtailredirects',
-	'wagtail.wagtailembeds',
-	'wagtail.wagtailsites',
-	'wagtail.wagtailusers',
-	'wagtail.wagtailsnippets',
-	'wagtail.wagtaildocs',
-	'wagtail.wagtailimages',
-	'wagtail.wagtailsearch',
-	'wagtail.wagtailadmin',
-	'wagtail.wagtailcore',
+	'wagtail.contrib.forms',
+	'wagtail.contrib.redirects',
+	'wagtail.embeds',
+	'wagtail.sites',
+	'wagtail.users',
+	'wagtail.snippets',
+	'wagtail.documents',
+	'wagtail.images',
+	'wagtail.search',
+	'wagtail.admin',
+	'wagtail.core',
 	'modelcluster',
 	'taggit',
 	'guide', # our local wagtail app
 	]
 
-MIDDLEWARE_CLASSES += [
-	'wagtail.wagtailcore.middleware.SiteMiddleware',
-	'wagtail.wagtailredirects.middleware.RedirectMiddleware',
+MIDDLEWARE+= [
+	'wagtail.core.middleware.SiteMiddleware',
+	'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 	]
 
 WAGTAIL_SITE_NAME = "du guide des responsables de fédérations"

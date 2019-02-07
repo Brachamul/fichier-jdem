@@ -53,8 +53,8 @@ def initiate_member(sender, instance, created, **kwargs):
 
 class Note(models.Model):
 
-	member = models.ForeignKey(Member)
-	author = models.ForeignKey(User)
+	member = models.ForeignKey(Member, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 	text = models.CharField(max_length=1024)
 	date = models.DateTimeField(auto_now_add=True)
 	
@@ -66,8 +66,8 @@ class Note(models.Model):
 
 class WrongNumber(models.Model):
 
-	member = models.ForeignKey(Member)
-	reported_by = models.ForeignKey(User)
+	member = models.ForeignKey(Member, on_delete=models.CASCADE)
+	reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 	date = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self): return self.member

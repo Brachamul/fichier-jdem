@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 
 from datetime import datetime, timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 

@@ -1,0 +1,14 @@
+cd fichier-jdem
+echo
+echo [Pulling from git]
+git pull
+echo
+echo [Collecting static files]
+workon fichier-jdem
+python manage.py collectstatic --noinput
+echo
+echo [Migrating]
+python manage.py migrate
+echo
+echo [Reloading web app]
+touch /var/www/fichier_jdem_fr_wsgi.py

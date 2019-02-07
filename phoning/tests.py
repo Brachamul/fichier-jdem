@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 
 import datetime as dt
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from django.contrib.auth.models import User
 from fichiers_adherents.models import Adherent, FichierAdherents
