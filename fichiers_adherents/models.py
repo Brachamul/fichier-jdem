@@ -38,7 +38,7 @@ class FichierAdherents(models.Model):
 		''' liste le nombre d'adhérents qui seraient introduits par ce fichier '''
 		nouveaux_adherents = []
 		for adherent in self.adherents_a_jour():
-			if adherent.est_nouveau(fichier=self) :
+			if adherent.est_nouveau() :
 				nouveaux_adherents.append(adherent)
 		return nouveaux_adherents
 
